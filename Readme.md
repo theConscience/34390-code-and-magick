@@ -1,7 +1,7 @@
 # Личный проект «Код и Магия» [![Build status][travis-image]][travis-url] [![Dependency status][dependency-image]][dependency-url]
 
 * Студент: [Виктор Капцов](https://up.htmlacademy.ru/javascript/4/user/34390).
-* Наставник: `Неизвестно`.
+* Наставник: `Отсутствует`.
 
 ---
 
