@@ -380,18 +380,151 @@
     _drawPauseScreen: function() {
       switch (this.state.currentStatus) {
         case Verdict.WIN:
-          console.log('you have won!');
+          this.generatePopup('You have won! Lets go to the party, and celebrate with our friends and drinks!');
           break;
         case Verdict.FAIL:
-          console.log('you have failed!');
+          this.generatePopup('You have failed your ancestors, Pendalf! Shame on you!');
           break;
         case Verdict.PAUSE:
-          console.log('game is on pause!');
+          this.generatePopup('game is on pause!');
           break;
         case Verdict.INTRO:
-          console.log('welcome to the game! Press Space to start');
+          this.generatePopup('Welcome to the game! Press Space to start. You can use shift to fire, and arrows to move. Good luck!');
           break;
       }
+    },
+
+    /**
+     * Генерация всплывающего окна.
+     * @param {array} text
+     */
+    generatePopup: function(messageText) {
+      messageText = messageText || 'неизвестное сообщение... ^_^';
+
+      var me = this.state.objects.filter(function(object) {
+          return object.type === ObjectType.ME;
+        })[0],
+        meRightX = me.x + me.width,
+        meTopY = me.y,
+        popupMaxWidth = 296,
+        popupMaxHeight = 182,
+        popupSmallSideHeight = 84,
+        popupBigSideHeight = 167,
+        popupRelativeStartPosX = meRightX - popupMaxWidth,
+        popupRelativeStartPosY = meTopY - popupMaxHeight;
+
+      if (popupRelativeStartPosX < 0) {
+        popupRelativeStartPosX = me.x;
+      }
+      if (popupRelativeStartPosY < 0) {
+        popupRelativeStartPosY = me.y + me.height;
+      }
+
+      // shape # 1 shadow
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeStyle = '#000000';
+      this.ctx.beginPath();
+      this.ctx.moveTo( popupRelativeStartPosX + 10, popupRelativeStartPosY + 10 );
+      this.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth + 10, popupRelativeStartPosY + 10 );
+      this.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth + 10, popupRelativeStartPosY + popupSmallSideHeight + 10 );
+      this.ctx.lineTo( popupRelativeStartPosX + 10, popupRelativeStartPosY + popupBigSideHeight + 10 );
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.stroke();
+      // shape # 1
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeStyle = '#000000';
+      this.ctx.fillStyle = '#FFFFFF';
+      this.ctx.beginPath();
+      this.ctx.moveTo( popupRelativeStartPosX, popupRelativeStartPosY );
+      this.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth, popupRelativeStartPosY );
+      this.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth, popupRelativeStartPosY + popupSmallSideHeight );
+      this.ctx.lineTo( popupRelativeStartPosX, popupRelativeStartPosY + popupBigSideHeight );
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.stroke();
+      // shape # 2 shadow
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeStyle = '#000000';
+      this.ctx.fillStyle = '#000000';
+      this.ctx.beginPath();
+      this.ctx.moveTo( popupRelativeStartPosX + 305, popupRelativeStartPosY + 105 );
+      this.ctx.lineTo( popupRelativeStartPosX + 305, popupRelativeStartPosY + popupMaxHeight + 10 );
+      this.ctx.bezierCurveTo( popupRelativeStartPosX + 298, popupRelativeStartPosY + 160, popupRelativeStartPosX + 259, popupRelativeStartPosY + 141, popupRelativeStartPosX + 167, popupRelativeStartPosY + 143 );
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.stroke();
+      // shape # 2
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeStyle = '#000000';
+      this.ctx.fillStyle = '#FFFFFF';
+      this.ctx.beginPath();
+      this.ctx.moveTo( popupRelativeStartPosX + 295, popupRelativeStartPosY + 95 );
+      this.ctx.lineTo( popupRelativeStartPosX + 295, popupRelativeStartPosY + popupMaxHeight );
+      this.ctx.bezierCurveTo( popupRelativeStartPosX + 288, popupRelativeStartPosY + 150, popupRelativeStartPosX + 249, popupRelativeStartPosY + 131, popupRelativeStartPosX + 157, popupRelativeStartPosY + 133 );
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.stroke();
+      // text config
+      this.ctx.font = '16px PT Mono';
+      this.ctx.textAlign = 'left';
+      this.ctx.textBaseline = 'top';
+      this.ctx.fillStyle = '#000000';
+      // fill text
+      this.fillLinesWithText(messageText, popupMaxWidth, popupMaxHeight, popupSmallSideHeight, popupRelativeStartPosX, popupRelativeStartPosY);
+    },
+
+    /**
+     * Генерация текста в блоке определённой ширины.
+     * @param {string} messageText
+     * @param {number} popupMaxWidth
+     * @param {number} popupMaxHeight
+     * @param {number} popupSmallSideHeight
+     * @param {number} popupLeftSideCoord
+     * @param {number} popupTopSideCoord
+     */
+    fillLinesWithText: function(messageText, popupMaxWidth, popupMaxHeight, popupSmallSideHeight, popupLeftSideCoord, popupTopSideCoord) {
+      popupSmallSideHeight = popupSmallSideHeight || popupMaxHeight;
+      popupMaxWidth = popupMaxWidth || this.canvas.width;
+      popupLeftSideCoord = popupLeftSideCoord || 0;
+      popupTopSideCoord = popupTopSideCoord || 0;
+
+      var words = messageText.split(' '),
+        lines = [],
+        wordsInLine = [],
+        wordsInLineLength = 0,
+        paddingWidth = 20,
+        lineHeight = 20,
+        rowNumber = 1;
+
+      var generateLines = function(word, index, arr) {
+        wordsInLineLength += this.ctx.measureText(word + ' ').width;
+        if (lines.length * lineHeight + paddingWidth >= popupSmallSideHeight - 5) {  // если текст доходит до среза трапеции
+          popupMaxWidth -= popupMaxWidth / 9;  // начинаем через уменьшение этой переменной влиять на длинну строки
+        }
+        if (lines.length * lineHeight + paddingWidth >= popupMaxHeight - 60) {  // если текст доходит почти до самого низа
+          return;  // прекращаем создание строк, чтобы слова не вываливались
+        }
+        if (wordsInLineLength >= popupMaxWidth - paddingWidth) {
+          lines.push(wordsInLine.join(' '));
+          wordsInLineLength = this.ctx.measureText(word + ' ').width;
+          wordsInLine = [];
+          wordsInLine.push(word);
+        } else {
+          wordsInLine.push(word);
+        }
+        if (index === arr.length - 1) {
+          lines.push(wordsInLine.join(' '));
+        }
+      };
+
+      var fillLines = function(line) {
+        this.ctx.fillText(line, popupLeftSideCoord + paddingWidth, popupTopSideCoord + lineHeight * rowNumber);
+        rowNumber++;
+      };
+
+      words.forEach(generateLines.bind(this));
+      lines.forEach(fillLines.bind(this));
     },
 
     /**
