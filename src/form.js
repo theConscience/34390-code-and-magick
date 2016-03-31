@@ -27,35 +27,27 @@
     formContainer.classList.add('invisible');
   };
 
-  var forEveryNode = function(nodelist, callback, scope) {
+  var forEachNode = function(nodelist, callback, scope) {
     for (var i = 0; i < nodelist.length; i++) {
       callback.call(scope, i, nodelist[i]);
     }
   };
 
   var checkFields = function() {
-    console.log('checkFields was called!');
-
     var reviewerNameCheck = !!reviewerName.value || false;
-    console.log('reviewerName.value = \'' + reviewerName.value + '\'', reviewerNameCheck);
     var reviewTextCheck = true;
 
-    forEveryNode(reviewMarks, function(index, node) {
+    forEachNode(reviewMarks, function(index, node) {
       if (node.checked) {
         reviewMark = parseInt(node.value, 10);
-        console.log('reviewMark', reviewMark);
       }
     });
 
     if (reviewMark < 3) {
-      console.log('reviewMark < 3, need to enter review text!');
       reviewTextCheck = !!reviewText.value || false;
     }
 
-    console.log('reviewText.value = \'' + reviewText.value + '\'', reviewTextCheck);
-
     if (reviewerNameCheck) {
-      console.log('hide namefield label');
       reviewerName.setCustomValidity('');
       reviewerNameError.innerHTML = reviewerName.validationMessage;
       reviewerNameError.classList.add('invisible');
@@ -67,13 +59,11 @@
         reviewerNameError.classList.remove('invisible');
       }
       if (reviewFieldsName.classList.contains('invisible')) {
-        console.log('show namefield label');
         reviewFieldsName.classList.remove('invisible');
       }
     }
 
     if (reviewTextCheck) {
-      console.log('hide textfield label');
       reviewText.setCustomValidity('');
       reviewTextError.innerHTML = reviewText.validationMessage;
       reviewTextError.classList.add('invisible');
@@ -85,31 +75,28 @@
         reviewTextError.classList.remove('invisible');
       }
       if (reviewFieldsText.classList.contains('invisible')) {
-        console.log('show textfield label');
         reviewFieldsText.classList.remove('invisible');
       }
     }
 
     if (reviewerNameCheck && reviewTextCheck) {
-      console.log('hide all fields label');
       reviewFields.classList.add('invisible');
       formSubmitButton.removeAttribute('disabled');
       return true;
     }
 
     if (reviewFields.classList.contains('invisible')) {
-      console.log('show all fields label');
       reviewFields.classList.remove('invisible');
     }
     formSubmitButton.setAttribute('disabled', true);
     return false;
   };
 
-  forEveryNode(formFields, function(index, node) {
+  forEachNode(formFields, function(index, node) {
     node.oninput = checkFields;
   });
 
-  forEveryNode(reviewMarks, function(index, node) {
+  forEachNode(reviewMarks, function(index, node) {
     node.onchange = checkFields;
   });
 
