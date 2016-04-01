@@ -29,13 +29,10 @@ var browserCookies = require('browser-cookies');
     formContainer.classList.add('invisible');
   };
 
-  reviewFields.classList.add('invisible');  // чтобы при отсутствии куков до начала ввода подсказки не появлялись
+  reviewFields.classList.add('invisible');  // чтобы до начала ввода, при отсутствии куков - подсказки не появлялись
 
   if (browserCookies.get('reviewerName')) {
-    console.log('Имя найдено в куках:', browserCookies.get('reviewerName'));
     reviewerName.value = browserCookies.get('reviewerName');
-  } else {
-    console.log('Имя не найдено в куках');
   }
 
   /**
@@ -51,15 +48,12 @@ var browserCookies = require('browser-cookies');
   };
 
   if (browserCookies.get('reviewMark')) {
-    console.log('Оценка найдена в куках:', browserCookies.get('reviewMark'));
     reviewMark = browserCookies.get('reviewMark');
     forEachNode(reviewMarks, function(index, node) {
       if (node.value === String(reviewMark)) {
         node.checked = true;
       }
     });
-  } else {
-    console.log('Оценка не найдена в куках');
   }
 
   /**
