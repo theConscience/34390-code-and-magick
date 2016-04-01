@@ -34,8 +34,29 @@
   };
 
   var checkFields = function() {
-    var reviewerNameCheck = !!reviewerName.value || false;
+    var reviewerNameCheck = !!reviewerName.value && isNaN(parseInt(reviewerName.value, 10)) || false;
     var reviewTextCheck = true;
+
+    if (reviewerNameCheck) {
+      reviewerName.setCustomValidity('');
+      reviewerNameError.innerHTML = reviewerName.validationMessage;
+      reviewerNameError.classList.add('invisible');
+      reviewFieldsName.classList.add('invisible');
+    } else {
+      if (!isNaN(parseInt(reviewerName.value, 10))) {
+        reviewerName.setCustomValidity('Вы ввели что-то, не слишком похожее на имя... :(');
+        reviewerNameError.innerHTML = reviewerName.validationMessage;
+      } else {
+        reviewerName.setCustomValidity('Вам точно стоит это заполнить :)');
+        reviewerNameError.innerHTML = reviewerName.validationMessage;
+      }
+      if (reviewerNameError.classList.contains('invisible')) {
+        reviewerNameError.classList.remove('invisible');
+      }
+      if (reviewFieldsName.classList.contains('invisible')) {
+        reviewFieldsName.classList.remove('invisible');
+      }
+    }
 
     forEachNode(reviewMarks, function(index, node) {
       if (node.checked) {
@@ -45,22 +66,6 @@
 
     if (reviewMark < 3) {
       reviewTextCheck = !!reviewText.value || false;
-    }
-
-    if (reviewerNameCheck) {
-      reviewerName.setCustomValidity('');
-      reviewerNameError.innerHTML = reviewerName.validationMessage;
-      reviewerNameError.classList.add('invisible');
-      reviewFieldsName.classList.add('invisible');
-    } else {
-      reviewerName.setCustomValidity('Вам точно стоит это заполнить :)');
-      reviewerNameError.innerHTML = reviewerName.validationMessage;
-      if (reviewerNameError.classList.contains('invisible')) {
-        reviewerNameError.classList.remove('invisible');
-      }
-      if (reviewFieldsName.classList.contains('invisible')) {
-        reviewFieldsName.classList.remove('invisible');
-      }
     }
 
     if (reviewTextCheck) {
@@ -88,6 +93,7 @@
     if (reviewFields.classList.contains('invisible')) {
       reviewFields.classList.remove('invisible');
     }
+
     formSubmitButton.setAttribute('disabled', true);
     return false;
   };
@@ -106,5 +112,4 @@
     }
   };
 
-  checkFields();
 })();
