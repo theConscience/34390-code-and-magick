@@ -1,5 +1,7 @@
 'use strict';
 
+var browserCookies = require('browser-cookies');
+
 (function() {
   var formContainer = document.querySelector('.overlay-container');
   var form = formContainer.querySelector('form.review-form');
@@ -27,12 +29,37 @@
     formContainer.classList.add('invisible');
   };
 
+  reviewFields.classList.add('invisible');  // чтобы до начала ввода, при отсутствии куков - подсказки не появлялись
+
+  if (browserCookies.get('reviewerName')) {
+    reviewerName.value = browserCookies.get('reviewerName');
+  }
+
+  /**
+   * Итерирует по объектам типа NodeList.
+   * @param {object} nodelist
+   * @param {function} callback
+   * @param {object} scope
+   */
   var forEachNode = function(nodelist, callback, scope) {
     for (var i = 0; i < nodelist.length; i++) {
       callback.call(scope, i, nodelist[i]);
     }
   };
 
+  if (browserCookies.get('reviewMark')) {
+    reviewMark = browserCookies.get('reviewMark');
+    forEachNode(reviewMarks, function(index, node) {
+      if (node.value === String(reviewMark)) {
+        node.checked = true;
+      }
+    });
+  }
+
+  /**
+   * Проверяет поля ввода.
+   * @return {boolean}
+   */
   var checkFields = function() {
     var reviewerNameCheck = !!reviewerName.value && isNaN(parseInt(reviewerName.value, 10)) || false;
     var reviewTextCheck = true;
@@ -110,6 +137,28 @@
     if (!checkFields()) {
       e.preventDefault();
     }
+
+    var now = new Date();
+    var nowMS = now.valueOf();
+    var thisYearBirthdayMS = now.setMonth(7 - 1, 5);
+    var expiresLengthMS = 0;
+    if (nowMS > thisYearBirthdayMS) {  // если день рождения был в этом году
+      expiresLengthMS = nowMS - thisYearBirthdayMS;
+    } else if (nowMS < thisYearBirthdayMS) {  // если день рождения был в прошлом году
+      var lastYear = now.getFullYear() - 1;
+      var lastYearBirthdayMS = now.setYear(lastYear, 7 - 1, 5);
+      expiresLengthMS = nowMS - lastYearBirthdayMS;
+    } else {  // если сегодня день рождения - ставим куки на год
+      expiresLengthMS = 365 * 24 * 3600 * 1000;
+    }
+    var expiresDateMS = Date.now() + expiresLengthMS;
+    var expiresDate = new Date(expiresDateMS);
+    browserCookies.set('reviewerName', reviewerName.value, {expires: expiresDate});
+    browserCookies.set('reviewMark', String(reviewMark), {expires: expiresDate});
   };
+
+  if (browserCookies.get('reviewMark') || browserCookies.get('reviewerName')) {
+    checkFields();
+  }
 
 })();
