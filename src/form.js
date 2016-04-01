@@ -27,12 +27,22 @@
     formContainer.classList.add('invisible');
   };
 
+  /**
+   * Итерирует по объектам типа NodeList.
+   * @param {object} nodelist
+   * @param {function} callback
+   * @param {object} scope
+   */
   var forEachNode = function(nodelist, callback, scope) {
     for (var i = 0; i < nodelist.length; i++) {
       callback.call(scope, i, nodelist[i]);
     }
   };
 
+  /**
+   * Проверяет поля ввода.
+   * @return {boolean}
+   */
   var checkFields = function() {
     var reviewerNameCheck = !!reviewerName.value && isNaN(parseInt(reviewerName.value, 10)) || false;
     var reviewTextCheck = true;
