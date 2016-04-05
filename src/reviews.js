@@ -20,9 +20,6 @@ var createReviewElement = function(review, container) {
     imageLoadTimeout,
     IMAGE_TIMEOUT = 10000;
 
-  //var fragment = document.createDocumentFragment();
-  //fragment.appendChild(element);
-
   var authorImage = element.querySelector('.review-author'),
     reviewRating = element.querySelector('.review-rating'),
     reviewRatingClone,
@@ -59,7 +56,6 @@ var createReviewElement = function(review, container) {
 };
 
 window.reviews.forEach(function(review, index, arr) {
-  console.log(index, review, review.author);
   createReviewElement(review, reviewsListContainer);
   if (index === arr.length - 1) {
     reviewsFilter.classList.remove('invisible');
