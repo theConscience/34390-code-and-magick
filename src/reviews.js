@@ -15,7 +15,6 @@ if ('content' in reviewTemplate) {  // находим шаблон
 reviewsFilter.classList.add('invisible');
 
 var renderReview = function(review, container) {
-  console.log('renderReview review =', review);
   var element = reviewElementToClone.cloneNode(true),
     image = new Image(124, 124),
     imageLoadTimeout,
@@ -56,7 +55,6 @@ var renderReview = function(review, container) {
 };
 
 var renderReviews = function(reviews) {
-  console.log('renderReviews reviews =', reviews);
   reviewsListContainer.innerHTML = '';
   reviews.forEach(function(review) {
     renderReview(review, reviewsListContainer);
@@ -66,9 +64,13 @@ var renderReviews = function(reviews) {
 
 var loadReviews = function(callback) {
   var xhr = new XMLHttpRequest(),
-    XHR_DONE = 4,
+    XHR_UNSENT = 0,
     XHR_OPENED = 1,
-    REVIEWS_LOAD_URL = '//o0.github.io/assets/json/reviews.json';
+    XHR_HEADERS_RECEIVED = 2,
+    XHR_LOADING = 3,
+    XHR_DONE = 4,
+    REVIEWS_LOAD_URL = '//o0.github.io/assets/json/reviews.json',
+    XHR_TIMEOUT = 10000;
 
   xhr.open('GET', REVIEWS_LOAD_URL, true);
 
@@ -76,22 +78,39 @@ var loadReviews = function(callback) {
     var requestObject = evt.target;
 
     switch (requestObject.readyState) {
+      case XHR_UNSENT:
+        break;
       case XHR_OPENED:
-        reviewsSection.classList.add('reviews-load-failure');
+        reviewsSection.classList.add('reviews-list-loading');
+        break;
+      case XHR_HEADERS_RECEIVED:
+        console.log('xhr headers recieved');
+        break;
+      case XHR_LOADING:
+        console.log('xhr loading...');
         break;
       case XHR_DONE:
-        reviewsSection.classList.remove('reviews-load-failure');
+        console.log('xhr done!');
+        reviewsSection.classList.remove('reviews-list-loading');
         var loadedReviews = JSON.parse(requestObject.response);
         callback(loadedReviews);
         break;
       default:
-        console.log(Error('Unknown error'));
+        console.log(Error('Неизвестная ошибка'));
     }
 
-    xhr.timeout = 10000;
+    xhr.onerror = function() {
+      console.log(Error('Ошибка сервера'));
+      reviewsSection.classList.remove('reviews-list-loading');
+      reviewsSection.classList.add('reviews-load-failure');
+    };
+
+    xhr.timeout = XHR_TIMEOUT;
     xhr.ontimeout = function() {
       console.log(Error('Соединение сброшено по тайм-ауту'));
-      //xhr.abort();
+      reviewsSection.classList.remove('reviews-list-loading');
+      reviewsSection.classList.add('reviews-load-failure');
+      xhr.abort();
     };
   };
 
@@ -99,45 +118,40 @@ var loadReviews = function(callback) {
 };
 
 var getFilteredReviews = function(reviews, filter) {
-  console.log('getFilteredReviews reviews =', reviews);
   var reviewsToFilter = reviews,
-    //TWO_WEEKS_MS = 14 * 24 * 3600 * 1000,
-    THIRTEEN_WEEKS_MS = 91 * 24 * 3600 * 1000;
+    TWO_WEEKS_MS = 14 * 24 * 3600 * 1000;
 
   switch (filter) {
     case 'reviews-recent':
-      return reviewsToFilter.sort(function(a, b) {
-        console.log(new Date(), new Date(a.date));
-        console.log('date.now - a.date - 12 weeks', Date.now() - new Date(a.date).valueOf() - THIRTEEN_WEEKS_MS);
+      return reviewsToFilter.filter(function(review) {
+        return Date.now() - new Date(review.date).valueOf() < TWO_WEEKS_MS;
+      }).sort(function(a, b) {
         return new Date(b.date).valueOf() - new Date(a.date).valueOf();
-      }).filter(function(review) {
-        return Date.now() - new Date(review.date).valueOf() < THIRTEEN_WEEKS_MS;
       });
     case 'reviews-good':
-      return reviewsToFilter.sort(function(a, b) {
-        return b.rating - a.rating;
-      }).filter(function(review) {
+      return reviewsToFilter.filter(function(review) {
         return review.rating >= 3;
+      }).sort(function(a, b) {
+        return b.rating - a.rating;
       });
     case 'reviews-bad':
-      return reviewsToFilter.sort(function(a, b) {
-        return a.rating - b.rating;
-      }).filter(function(review) {
+      return reviewsToFilter.filter(function(review) {
         return review.rating <= 2;
+      }).sort(function(a, b) {
+        return a.rating - b.rating;
       });
     case 'reviews-popular':
-      reviewsToFilter.sort(function(a, b) {
+      return reviewsToFilter.sort(function(a, b) {
         return b.review_usefulness - a.review_usefulness;
       });
+    case 'reviews-all':
+    default:
+      return reviewsToFilter;
   }
-
-  return reviewsToFilter;
 };
 
 var setReviewsFilter = function(reviews, filterId) {
-  console.log('setReviewsFilter reviews before filtering =', reviews);
   var filteredReviews = getFilteredReviews(reviews, filterId);
-  console.log('setReviewsFilter filteredReviews =', filteredReviews);
   renderReviews(filteredReviews);
   if (document.querySelector('.reviews-filter-item.active')) {
     document.querySelector('.reviews-filter-item.active').classList.remove('active');
@@ -150,7 +164,6 @@ var setReviewsFilters = function(reviews) {
   for (var i = 0; i < filters.length; i++) {
     filters[i].onclick = function(evt) {
       var filterId = evt.target.id;
-      console.log('setReviewsFilters filterId =', filterId);
       setReviewsFilter(reviews, filterId);
     };
   }
@@ -158,7 +171,6 @@ var setReviewsFilters = function(reviews) {
 
 var setReviews = function(loadedReviews) {
   var reviews = loadedReviews;
-  console.log('setReviews reviews =', reviews);
   setReviewsFilters(reviews);
   renderReviews(reviews);
 };
