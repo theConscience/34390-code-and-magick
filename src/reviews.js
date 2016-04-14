@@ -161,7 +161,7 @@ var isNextPageAvailable = function(elements, page, pageSize) {
 };
 
 var renderNextReviewPage = function() {
-  if (isNextPageAvailable(reviews, pageNumber, PAGE_SIZE)) {
+  if (isNextPageAvailable(filteredReviews, pageNumber, PAGE_SIZE)) {
     pageNumber++;
     renderReviews(filteredReviews, pageNumber, false);
   } else {
