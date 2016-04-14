@@ -3,7 +3,6 @@
 var reviewsFilter = document.querySelector('.reviews-filter'),
   reviewTemplate = document.querySelector('#review-template'),
   reviewsListContainer = document.querySelector('.reviews-list'),
-  //nextElementAfterContainer = reviewsListContainer.nextElementSibling,
   moreReviewsButton = document.querySelector('.reviews-controls-more'),
   reviewsSection = document.querySelector('.reviews'),
   reviews = [],
@@ -138,37 +137,17 @@ var setReviewsFilter = function(filterId) {
     document.querySelector('.reviews-filter-item.' + ACTIVE_FILTER_CLASSNAME).classList.remove(ACTIVE_FILTER_CLASSNAME);
   }
   document.querySelector('#' + filterId).classList.add(ACTIVE_FILTER_CLASSNAME);
-  // + ARIA
 };
 
 var setReviewsFilters = function() {
-  // var filters = document.querySelectorAll('[name=reviews]');
-  // for (var i = 0; i < filters.length; i++) {
-  //   filters[i].onclick = function(evt) {
-  //     var filterId = evt.target.id;
-  //     setReviewsFilter(filterId);
-  //     setMoreReviewsListener();
-  //   };
-  // }
   reviewsFilter.addEventListener('click', function(evt) {
     if (evt.target.classList.contains('reviews-filter-item')) {
       var filterId = evt.target.getAttribute('for');
-      console.log('filterId =', filterId);
       setReviewsFilter(filterId);
       setMoreReviewsListener();
     }
   });
 };
-
-// /**  @return {boolean} */
-// var isAtBottom = function() {
-//   var GAP = 100;
-//   var nextElementPosition = nextElementAfterContainer.getBoundingClientRect();
-//   console.log('nextElementPosition =', nextElementPosition);
-//   console.log('window.innerHeight + GAP =', window.innerHeight, '+', GAP);
-//   console.log('nextElementPosition.top < window.innerHeight + GAP = ', nextElementPosition.top < window.innerHeight + GAP);
-//   return nextElementPosition.top < window.innerHeight + GAP;
-// };
 
 /**
  * @param {Array} elements
@@ -178,28 +157,10 @@ var setReviewsFilters = function() {
  */
 var isNextPageAvailable = function(elements, page, pageSize) {
   var lastPage = Math.floor(elements.length / pageSize);
-  console.log('page =', page);
-  console.log('lastPage =', lastPage);
-  console.log('page < lastPage =', page < lastPage);
   return page < lastPage;
 };
 
-// var setOnScrollReviewsLoader = function() {
-//   var scrollTimeOut;
-//   window.addEventListener('scroll', function() {
-//     clearTimeout(scrollTimeOut);
-//     scrollTimeOut = setTimeout(function() {
-//       if (isAtBottom() && isNextPageAvailable(reviews, pageNumber, PAGE_SIZE)) {
-//         pageNumber++;
-//         console.log('load page #', pageNumber, '\n\n======');
-//         renderReviews(filteredReviews, pageNumber, false);
-//       }
-//     }, 100);
-//   });
-// };
-
 var renderNextReviewPage = function() {
-  console.log('renderNextPage');
   if (isNextPageAvailable(reviews, pageNumber, PAGE_SIZE)) {
     pageNumber++;
     renderReviews(filteredReviews, pageNumber, false);
@@ -282,7 +243,6 @@ var setReviews = function(loadedReviews) {
   reviews = loadedReviews;
   setReviewsFilters();
   setReviewsFilter(DEFAULT_FILTER);
-  //setOnScrollReviewsLoader();
   setMoreReviewsListener();
 };
 
