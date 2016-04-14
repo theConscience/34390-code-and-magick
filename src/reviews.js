@@ -174,7 +174,7 @@ var renderNextReviewPage = function() {
 
 var setMoreReviewsListener = function() {
   moreReviewsButton.removeEventListener('click', renderNextReviewPage);
-  if (isNextPageAvailable(reviews, pageNumber, PAGE_SIZE)) {
+  if (isNextPageAvailable(filteredReviews, pageNumber, PAGE_SIZE)) {
     if (moreReviewsButton.classList.contains('invisible')) {
       moreReviewsButton.classList.remove('invisible');
     }
