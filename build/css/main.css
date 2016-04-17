@@ -59,7 +59,7 @@ header {
 
   height: 363px;
 
-  background: url("../img/clouds.png") top center repeat-x;
+  background: url("../img/clouds.png") center top repeat-x;
 }
 
 .header-fence {
