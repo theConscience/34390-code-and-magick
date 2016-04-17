@@ -330,12 +330,12 @@
         this.state.startTime = this.state.levelStartTime;
       }
 
-      // Получение значений положения облаков в объект _cloudsStartingPosition
-      this._getCloudsStartingPosition();
-
       this._preloadImagesForLevel(function() {
         // Предварительная отрисовка игрового экрана.
         this.render();
+
+        // Получение значений положения облаков в объект-свойство _cloudsStartingPosition
+        this._getCloudsStartingPosition();
 
         // Установка обработчиков событий.
         this._initializeGameListeners();
@@ -855,8 +855,6 @@
       } else {
         console.log(Error('Unknown units of .header-clouds background position vertical value'));
       }
-
-      console.log('this._cloudsStartingPosition =', this._cloudsStartingPosition);
     },
 
     /**
@@ -894,9 +892,10 @@
     _onScroll: function(evt) {
       var cloudsBackgroundPositionX = (this._cloudsStartingPosition.horizontalValue + evt.pageY / 10).toFixed(2) + this._cloudsStartingPosition.horizontalUnits;
       this.clouds.style.backgroundPosition = cloudsBackgroundPositionX + ' ' + this._cloudsStartingPosition.vertical;
-      console.log('this.clouds.style.backgroundPosition =', this.clouds.style.backgroundPosition);
+
       this._cloudsPosition = this.clouds.getBoundingClientRect();
       this._containerPosition = this.container.getBoundingClientRect();
+
       clearTimeout(this.scrollTimeOut);
       this.scrollTimeout = setTimeout(function() {
         if (this._isCloudsVisible() && this._isContainerVisible()) {
