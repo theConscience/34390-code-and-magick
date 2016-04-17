@@ -889,8 +889,9 @@
      * @param {scroll} evt [description]
      * @private
      */
-    _onScroll: function(evt) {
-      var cloudsBackgroundPositionX = (this._cloudsStartingPosition.horizontalValue + evt.pageY / 10).toFixed(2) + this._cloudsStartingPosition.horizontalUnits;
+    _onScroll: function() {
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      var cloudsBackgroundPositionX = (this._cloudsStartingPosition.horizontalValue + scrollTop / 10).toFixed(2) + this._cloudsStartingPosition.horizontalUnits;
       this.clouds.style.backgroundPosition = cloudsBackgroundPositionX + ' ' + this._cloudsStartingPosition.vertical;
 
       this._cloudsPosition = this.clouds.getBoundingClientRect();
