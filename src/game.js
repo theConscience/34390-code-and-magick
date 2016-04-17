@@ -247,6 +247,8 @@
   var Game = function(container) {
     this.container = container;
     this.canvas = document.createElement('canvas');
+    this.clouds = document.querySelector('.header-clouds');
+    this.scrollTimeout = null;
     this.canvas.width = container.clientWidth;
     this.canvas.height = container.clientHeight;
     this.container.appendChild(this.canvas);
@@ -255,6 +257,7 @@
 
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onKeyUp = this._onKeyUp.bind(this);
+    this._onScroll = this._onScroll.bind(this);
     this._pauseListener = this._pauseListener.bind(this);
   };
 
@@ -326,6 +329,9 @@
       if (!this.state.startTime) {
         this.state.startTime = this.state.levelStartTime;
       }
+
+      // Получение значений положения облаков в объект _cloudsStartingPosition
+      this._getCloudsStartingPosition();
 
       this._preloadImagesForLevel(function() {
         // Предварительная отрисовка игрового экрана.
@@ -798,10 +804,118 @@
       }
     },
 
+    /**
+     * @private
+     * @type {Object}
+     */
+    _cloudsStartingPosition: {
+      horizontal: '',
+      horizontalValue: 0,
+      horizontalUnits: '',
+      vertical: '',
+      verticalValue: 0,
+      verticalUnits: ''
+    },
+
+    /**
+     * Метод для получения значений background-position, чтобы перемещение облаков
+     * работало независимо от единиц измерения, переданных в css
+     * @private
+     * @type {Function}
+     */
+    _getCloudsStartingPosition: function() {
+      var cloudsBackgroundPosition = getComputedStyle(this.clouds).backgroundPosition,
+        cloudsBackgroundPositionX = cloudsBackgroundPosition.split(' ')[0],
+        cloudsBackgroundPositionY = cloudsBackgroundPosition.split(' ')[1];
+
+      this._cloudsStartingPosition.horizontal = cloudsBackgroundPositionX;
+      this._cloudsStartingPosition.horizontalValue = parseInt(cloudsBackgroundPositionX, 10);
+      if (~cloudsBackgroundPositionX.indexOf('%')) {
+        this._cloudsStartingPosition.horizontalUnits = '%';
+      } else if (~cloudsBackgroundPositionX.indexOf('px')) {
+        this._cloudsStartingPosition.horizontalUnits = 'px';
+      } else if (~cloudsBackgroundPositionX.indexOf('em')) {
+        this._cloudsStartingPosition.horizontalUnits = 'em';
+      } else if (~cloudsBackgroundPositionX.indexOf('pt')) {
+        this._cloudsStartingPosition.horizontalUnits = 'pt';
+      } else {
+        console.log(Error('Unknown units of .header-clouds background position horizontal value'));
+      }
+
+      this._cloudsStartingPosition.vertical = cloudsBackgroundPositionY;
+      this._cloudsStartingPosition.verticalValue = parseInt(cloudsBackgroundPositionY, 10);
+      if (~cloudsBackgroundPositionY.indexOf('%')) {
+        this._cloudsStartingPosition.verticalUnits = '%';
+      } else if (~cloudsBackgroundPositionY.indexOf('px')) {
+        this._cloudsStartingPosition.verticalUnits = 'px';
+      } else if (~cloudsBackgroundPositionY.indexOf('em')) {
+        this._cloudsStartingPosition.verticalUnits = 'em';
+      } else if (~cloudsBackgroundPositionY.indexOf('pt')) {
+        this._cloudsStartingPosition.verticalUnits = 'pt';
+      } else {
+        console.log(Error('Unknown units of .header-clouds background position vertical value'));
+      }
+
+      console.log('this._cloudsStartingPosition =', this._cloudsStartingPosition);
+    },
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    _cloudsPosition: null,
+
+    /**
+     * @private
+     * @return {boolean}
+     */
+    _isCloudsVisible: function() {
+      return (this._cloudsPosition.top + this._cloudsPosition.height > 0) && (this._cloudsPosition.top < window.innerHeight);
+    },
+
+    /**
+     * @private
+     * @type {Object}
+     */
+    _containerPosition: null,
+
+    /**
+     * @private
+     * @return {boolean}
+     */
+    _isContainerVisible: function() {
+      return (this._containerPosition.top + this._containerPosition.height > 0) && (this._containerPosition.top < window.innerHeight);
+    },
+
+    /**
+     * @param {scroll} evt [description]
+     * @private
+     */
+    _onScroll: function(evt) {
+      var cloudsBackgroundPositionX = (this._cloudsStartingPosition.horizontalValue + evt.pageY / 10).toFixed(2) + this._cloudsStartingPosition.horizontalUnits;
+      this.clouds.style.backgroundPosition = cloudsBackgroundPositionX + ' ' + this._cloudsStartingPosition.vertical;
+      console.log('this.clouds.style.backgroundPosition =', this.clouds.style.backgroundPosition);
+      this._cloudsPosition = this.clouds.getBoundingClientRect();
+      this._containerPosition = this.container.getBoundingClientRect();
+      clearTimeout(this.scrollTimeOut);
+      this.scrollTimeout = setTimeout(function() {
+        if (this._isCloudsVisible() && this._isContainerVisible()) {
+          console.log('clouds and game are visible');
+        } else if (this._isContainerVisible()) {
+          console.log('clouds are invisible, game is visible');
+        } else {
+          console.log('clouds and game are invisible');
+          this.setGameStatus(Verdict.PAUSE);
+          window.removeEventListener('scroll', this._onScroll);
+        }
+      }.bind(this), 100);
+    },
+
     /** @private */
     _initializeGameListeners: function() {
       window.addEventListener('keydown', this._onKeyDown);
       window.addEventListener('keyup', this._onKeyUp);
+      window.addEventListener('scroll', this._onScroll);
     },
 
     /** @private */
