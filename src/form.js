@@ -10,6 +10,7 @@ var browserCookies = require('browser-cookies');
   var formSubmitButton = form.querySelector('.review-submit');
   var formFields = form.querySelectorAll('#review-name, #review-text');  // NodeList
   var reviewMarks = form.querySelectorAll('input[name=review-mark]');  // NodeList
+  var reviewMarksLabels = form.querySelectorAll('.review-mark-label');
   var reviewerName = form.querySelector('#review-name');
   var reviewerNameError = form.querySelector('.review-name-error');
   var reviewText = form.querySelector('#review-text');
@@ -24,9 +25,29 @@ var browserCookies = require('browser-cookies');
     formContainer.classList.remove('invisible');
   };
 
+  /**
+   * @param {KeyboardEvent} evt [description]
+   */
+  formOpenButton.onkeydown = function(evt) {
+    if ([13, 32].indexOf(evt.keyCode) > -1) {
+      evt.preventDefault();
+      formContainer.classList.remove('invisible');
+    }
+  };
+
   formCloseButton.onclick = function(evt) {
     evt.preventDefault();
     formContainer.classList.add('invisible');
+  };
+
+  /**
+   * @param {KeyboardEvent} evt [description]
+   */
+  formCloseButton.onkeydown = function(evt) {
+    if ([13, 32].indexOf(evt.keyCode) > -1) {
+      evt.preventDefault();
+      formContainer.classList.add('invisible');
+    }
   };
 
   reviewFields.classList.add('invisible');  // чтобы до начала ввода, при отсутствии куков - подсказки не появлялись
@@ -61,7 +82,7 @@ var browserCookies = require('browser-cookies');
    * @return {boolean}
    */
   var checkFields = function() {
-    var reviewerNameCheck = !!reviewerName.value && isNaN(parseInt(reviewerName.value, 10)) || false;
+    var reviewerNameCheck = !!reviewerName.value && isNaN(parseInt(reviewerName.value, 10)) || false;  // имя введено, и не начинается с цифры
     var reviewTextCheck = true;
 
     if (reviewerNameCheck) {
@@ -70,10 +91,10 @@ var browserCookies = require('browser-cookies');
       reviewerNameError.classList.add('invisible');
       reviewFieldsName.classList.add('invisible');
     } else {
-      if (!isNaN(parseInt(reviewerName.value, 10))) {
+      if (!isNaN(parseInt(reviewerName.value, 10))) {  // имя начинается с цифры
         reviewerName.setCustomValidity('Вы ввели что-то, не слишком похожее на имя... :(');
         reviewerNameError.innerHTML = reviewerName.validationMessage;
-      } else {
+      } else {  // имя не введено
         reviewerName.setCustomValidity('Вам точно стоит это заполнить :)');
         reviewerNameError.innerHTML = reviewerName.validationMessage;
       }
@@ -86,12 +107,16 @@ var browserCookies = require('browser-cookies');
     }
 
     forEachNode(reviewMarks, function(index, node) {
-      if (node.checked) {
+      if (node.checked) {  // запоминаем выбранную оценку в переменную
         reviewMark = parseInt(node.value, 10);
+        document.querySelector('label[for=' + node.id + ']').setAttribute('aria-checked', 'true');
+      } else {
+        //node.nextElementSibling.setAttribute('aria-checked', 'false');
+        document.querySelector('label[for=' + node.id + ']').setAttribute('aria-checked', 'false');
       }
     });
 
-    if (reviewMark < 3) {
+    if (reviewMark < 3) {  // если оценка меньше 3 - проверяем наличие текста отзыва
       reviewTextCheck = !!reviewText.value || false;
     }
 
@@ -133,11 +158,19 @@ var browserCookies = require('browser-cookies');
     node.onchange = checkFields;
   });
 
-  form.onsubmit = function(e) {
+  forEachNode(reviewMarksLabels, function(index, node) {
+    node.onkeydown = function(evt) {
+      if ([13, 32].indexOf(evt.keyCode) > -1) {
+        document.querySelector('#' + evt.target.getAttribute('for')).checked = true;
+        checkFields();
+      }
+    };
+  });
+
+  var beforeSubmit = function(e) {
     if (!checkFields()) {
       e.preventDefault();
     }
-
     var now = new Date();
     var nowMS = now.valueOf();
     var thisYearBirthdayMS = now.setMonth(7 - 1, 5);
@@ -155,6 +188,18 @@ var browserCookies = require('browser-cookies');
     var expiresDate = new Date(expiresDateMS);
     browserCookies.set('reviewerName', reviewerName.value, {expires: expiresDate});
     browserCookies.set('reviewMark', String(reviewMark), {expires: expiresDate});
+  };
+
+  form.onsubmit = beforeSubmit;
+
+  /**
+   * @param {KeyboardEvent} evt [description]
+   */
+  formSubmitButton.onkeydown = function(evt) {
+    if ([13, 32].indexOf(evt.keyCode) > -1) {
+      beforeSubmit();
+      form.submit();
+    }
   };
 
   if (browserCookies.get('reviewMark') || browserCookies.get('reviewerName')) {

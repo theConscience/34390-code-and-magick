@@ -248,7 +248,6 @@
     this.container = container;
     this.canvas = document.createElement('canvas');
     this.clouds = document.querySelector('.header-clouds');
-    this.scrollTimeout = null;
     this.canvas.width = container.clientWidth;
     this.canvas.height = container.clientHeight;
     this.container.appendChild(this.canvas);
@@ -258,6 +257,7 @@
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onKeyUp = this._onKeyUp.bind(this);
     this._onScroll = this._onScroll.bind(this);
+    this._scrollTimeout = null;
     this._pauseListener = this._pauseListener.bind(this);
   };
 
@@ -402,7 +402,7 @@
 
     /**
      * Генерация всплывающего окна.
-     * @param {array} text
+     * @param {string} messageText
      */
     generatePopup: function(messageText) {
       messageText = messageText || 'неизвестное сообщение... ^_^';
@@ -419,10 +419,10 @@
         popupRelativeStartPosX = meRightX - popupMaxWidth,
         popupRelativeStartPosY = meTopY - popupMaxHeight;
 
-      if (popupRelativeStartPosX < 0) {
+      if (popupRelativeStartPosX < 0) {  // если всплывающее окно уходит за левый край экрана
         popupRelativeStartPosX = me.x;
       }
-      if (popupRelativeStartPosY < 0) {
+      if (popupRelativeStartPosY < 0) {  // если всплывающее окно уходит за верх экрана
         popupRelativeStartPosY = me.y + me.height;
       }
 
@@ -805,6 +805,7 @@
     },
 
     /**
+     * Хранилище данных о css:background-position блока с облаками
      * @private
      * @type {Object}
      */
@@ -819,7 +820,7 @@
 
     /**
      * Метод для получения значений background-position, чтобы перемещение облаков
-     * работало независимо от единиц измерения, переданных в css
+     * работало независимо от типа значений, переданных в css
      * @private
      * @type {Function}
      */
@@ -829,7 +830,9 @@
         cloudsBackgroundPositionY = cloudsBackgroundPosition.split(' ')[1];
 
       this._cloudsStartingPosition.horizontal = cloudsBackgroundPositionX;
+      this._cloudsStartingPosition.vertical = cloudsBackgroundPositionY;
       this._cloudsStartingPosition.horizontalValue = parseInt(cloudsBackgroundPositionX, 10);
+      this._cloudsStartingPosition.verticalValue = parseInt(cloudsBackgroundPositionY, 10);
       if (~cloudsBackgroundPositionX.indexOf('%')) {
         this._cloudsStartingPosition.horizontalUnits = '%';
       } else if (~cloudsBackgroundPositionX.indexOf('px')) {
@@ -841,9 +844,6 @@
       } else {
         console.log(Error('Unknown units of .header-clouds background position horizontal value'));
       }
-
-      this._cloudsStartingPosition.vertical = cloudsBackgroundPositionY;
-      this._cloudsStartingPosition.verticalValue = parseInt(cloudsBackgroundPositionY, 10);
       if (~cloudsBackgroundPositionY.indexOf('%')) {
         this._cloudsStartingPosition.verticalUnits = '%';
       } else if (~cloudsBackgroundPositionY.indexOf('px')) {
@@ -885,26 +885,24 @@
       return (this._containerPosition.top + this._containerPosition.height > 0) && (this._containerPosition.top < window.innerHeight);
     },
 
+    makeCloudsParallax: function() {
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      var cloudsBackgroundPositionX = (this._cloudsStartingPosition.horizontalValue + scrollTop / 10).toFixed(2) + this._cloudsStartingPosition.horizontalUnits;
+      this.clouds.style.backgroundPosition = cloudsBackgroundPositionX + ' ' + this._cloudsStartingPosition.vertical;
+    },
+
     /**
      * @param {scroll} evt [description]
      * @private
      */
     _onScroll: function() {
-      var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      var cloudsBackgroundPositionX = (this._cloudsStartingPosition.horizontalValue + scrollTop / 10).toFixed(2) + this._cloudsStartingPosition.horizontalUnits;
-      this.clouds.style.backgroundPosition = cloudsBackgroundPositionX + ' ' + this._cloudsStartingPosition.vertical;
-
+      this.makeCloudsParallax();
       this._cloudsPosition = this.clouds.getBoundingClientRect();
       this._containerPosition = this.container.getBoundingClientRect();
-
-      clearTimeout(this.scrollTimeOut);
-      this.scrollTimeout = setTimeout(function() {
-        if (this._isCloudsVisible() && this._isContainerVisible()) {
-          console.log('clouds and game are visible');
-        } else if (this._isContainerVisible()) {
-          console.log('clouds are invisible, game is visible');
-        } else {
-          console.log('clouds and game are invisible');
+      clearTimeout(this._scrollTimeOut);
+      this._scrollTimeout = setTimeout(function() {
+        if (!this._isCloudsVisible() && !this._isContainerVisible()) {
+          console.log('clouds and game are invisible: set game to pause, remove event listener of scroll event.');
           this.setGameStatus(Verdict.PAUSE);
           window.removeEventListener('scroll', this._onScroll);
         }
