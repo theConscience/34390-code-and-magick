@@ -20,6 +20,9 @@ var browserCookies = require('browser-cookies');
   var reviewFieldsText = form.querySelector('.review-fields-text');
   var reviewMark = null;
 
+  /**
+   * @param {MouseEvent} evt [description]
+   */
   formOpenButton.onclick = function(evt) {
     evt.preventDefault();
     formContainer.classList.remove('invisible');
@@ -35,6 +38,9 @@ var browserCookies = require('browser-cookies');
     }
   };
 
+  /**
+   * @param {MouseEvent} evt [description]
+   */
   formCloseButton.onclick = function(evt) {
     evt.preventDefault();
     formContainer.classList.add('invisible');

@@ -210,7 +210,7 @@ var isNextPageAvailable = function(elements, page, pageSize) {
 };
 
 /**
- * @param {click} evt
+ * @param {MouseEvent} evt [description]
  */
 var renderNextReviewPage = function(evt) {
   if (evt.type === 'click' ||
