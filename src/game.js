@@ -1,5 +1,7 @@
 'use strict';
 
+var utils = require('./utils/utils');
+
 (function() {
   /**
    * @const
@@ -370,7 +372,7 @@
      * @private
      */
     _pauseListener: function(evt) {
-      if (evt.keyCode === 32) {
+      if (utils.isPauseEvent(evt)) {
         evt.preventDefault();
         var needToRestartTheGame = this.state.currentStatus === Verdict.WIN ||
             this.state.currentStatus === Verdict.FAIL;
@@ -832,7 +834,6 @@
       this._cloudsStartingPosition.horizontal = cloudsBackgroundPositionX;
       this._cloudsStartingPosition.vertical = cloudsBackgroundPositionY;
       this._cloudsStartingPosition.horizontalValue = parseInt(cloudsBackgroundPositionX, 10);
-      this._cloudsStartingPosition.verticalValue = parseInt(cloudsBackgroundPositionY, 10);
       if (~cloudsBackgroundPositionX.indexOf('%')) {
         this._cloudsStartingPosition.horizontalUnits = '%';
       } else if (~cloudsBackgroundPositionX.indexOf('px')) {
@@ -844,6 +845,9 @@
       } else {
         console.log(Error('Unknown units of .header-clouds background position horizontal value'));
       }
+
+
+
       if (~cloudsBackgroundPositionY.indexOf('%')) {
         this._cloudsStartingPosition.verticalUnits = '%';
       } else if (~cloudsBackgroundPositionY.indexOf('px')) {

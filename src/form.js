@@ -1,6 +1,7 @@
 'use strict';
 
 var browserCookies = require('browser-cookies');
+var utils = require('./utils/utils');
 
 (function() {
   var formContainer = document.querySelector('.overlay-container');
@@ -32,7 +33,7 @@ var browserCookies = require('browser-cookies');
    * @param {KeyboardEvent} evt [description]
    */
   formOpenButton.onkeydown = function(evt) {
-    if ([13, 32].indexOf(evt.keyCode) > -1) {
+    if (utils.isActivationEvent(evt)) {
       evt.preventDefault();
       formContainer.classList.remove('invisible');
     }
@@ -50,7 +51,7 @@ var browserCookies = require('browser-cookies');
    * @param {KeyboardEvent} evt [description]
    */
   formCloseButton.onkeydown = function(evt) {
-    if ([13, 32].indexOf(evt.keyCode) > -1) {
+    if (utils.isActivationEvent(evt)) {
       evt.preventDefault();
       formContainer.classList.add('invisible');
     }
@@ -166,7 +167,7 @@ var browserCookies = require('browser-cookies');
 
   forEachNode(reviewMarksLabels, function(index, node) {
     node.onkeydown = function(evt) {
-      if ([13, 32].indexOf(evt.keyCode) > -1) {
+      if (utils.isActivationEvent(evt)) {
         document.querySelector('#' + evt.target.getAttribute('for')).checked = true;
         checkFields();
       }
@@ -202,7 +203,7 @@ var browserCookies = require('browser-cookies');
    * @param {KeyboardEvent} evt [description]
    */
   formSubmitButton.onkeydown = function(evt) {
-    if ([13, 32].indexOf(evt.keyCode) > -1) {
+    if (utils.isActivationEvent(evt)) {
       beforeSubmit();
       form.submit();
     }
