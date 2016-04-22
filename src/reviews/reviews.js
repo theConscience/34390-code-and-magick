@@ -10,7 +10,7 @@ var reviewsFilter = document.querySelector('.reviews-filter'),
   reviewsListContainer = document.querySelector('.reviews-list'),
   moreReviewsButton = document.querySelector('.reviews-controls-more');
 
-/** @type {string} */
+/** @constant {string} */
 var REVIEWS_LOAD_URL = '//o0.github.io/assets/json/reviews.json';
 
 /** @type {Array.<Object>} */

@@ -8,6 +8,9 @@ var KeyCode = {
 
 module.exports = {
 
+  /** @constant {string} */
+  HIDDEN_CLASS_NAME: 'invisible',
+
   /**
    * @param {Array} elements
    * @param {Number} page
@@ -41,6 +44,18 @@ module.exports = {
    */
   isDeactivationEvent: function(evt) {
     return evt.keyCode === KeyCode.ESC;
+  },
+
+  /**
+   * Итерирует по объектам типа NodeList.
+   * @param {object} nodelist
+   * @param {function} callback
+   * @param {object} scope
+   */
+  forEachNode: function(nodelist, callback, scope) {
+    for (var i = 0; i < nodelist.length; i++) {
+      callback.call(scope, i, nodelist[i]);
+    }
   }
 
 };
