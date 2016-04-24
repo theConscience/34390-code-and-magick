@@ -368,7 +368,6 @@ Game.prototype = {
    * Обработчик событий клавиатуры во время паузы.
    * @param {KeyboardsEvent} evt
    * @private
-   * @private
    */
   _pauseListener: function(evt) {
     if (utils.isPauseEvent(evt)) {
@@ -807,8 +806,8 @@ Game.prototype = {
 
   /**
    * Хранилище данных о css:background-position блока с облаками
-   * @private
    * @type {Object}
+   * @private
    */
   _cloudsStartingPosition: {
     horizontal: '',
@@ -858,28 +857,28 @@ Game.prototype = {
   },
 
   /**
-   * @private
    * @type {Object}
+   * @private
    */
   _cloudsPosition: null,
 
   /**
-   * @private
    * @type {Object}
+   * @private
    */
   _containerPosition: null,
 
   /**
-   * @private
    * @return {boolean}
+   * @private
    */
   _isCloudsVisible: function() {
     return (this._cloudsPosition.top + this._cloudsPosition.height > 0) && (this._cloudsPosition.top < window.innerHeight);
   },
 
   /**
-   * @private
    * @return {boolean}
+   * @private
    */
   _isContainerVisible: function() {
     return (this._containerPosition.top + this._containerPosition.height > 0) && (this._containerPosition.top < window.innerHeight);
@@ -926,9 +925,7 @@ Game.prototype = {
   }
 };
 
-window.Game = Game;
-window.Game.Verdict = Verdict;
-
-var game = new Game(document.querySelector('.demo'));
-game.initializeLevelAndStart();
-game.setGameStatus(window.Game.Verdict.INTRO);
+module.exports = {
+  Game: Game,
+  Verdict: Verdict
+};

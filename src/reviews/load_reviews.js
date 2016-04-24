@@ -34,6 +34,7 @@ var loadReviews = function(url, callback) {
         console.log('xhr done!');
         reviewsSection.classList.remove('reviews-list-loading');
         var loadedReviews = JSON.parse(requestObject.response);
+        console.log(loadedReviews);
         callback(loadedReviews);
         break;
       default:

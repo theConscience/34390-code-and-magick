@@ -1,6 +1,6 @@
 'use strict';
 
-var utils = require('../utils/utils');
+var utils = require('../../utils/utils');
 
 var form = document.querySelector('form.review-form'),
   reviewerName = form.querySelector('#review-name'),
