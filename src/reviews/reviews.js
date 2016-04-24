@@ -1,7 +1,6 @@
 'use strict';
 
 var utils = require('../utils/utils');
-var load = require('./load');
 var Filter = require('./filters/filter_types');
 var filterReviews = require('./filters/filter_reviews');
 var renderReview = require('./render_review');
@@ -9,9 +8,6 @@ var renderReview = require('./render_review');
 var reviewsFilter = document.querySelector('.reviews-filter'),
   reviewsListContainer = document.querySelector('.reviews-list'),
   moreReviewsButton = document.querySelector('.reviews-controls-more');
-
-/** @constant {string} */
-var REVIEWS_LOAD_URL = '//o0.github.io/assets/json/reviews.json';
 
 /** @type {Array.<Object>} */
 var reviews = [];
@@ -135,4 +131,4 @@ var setReviews = function(loadedReviews) {
   setMoreReviewsListener();
 };
 
-load(REVIEWS_LOAD_URL, setReviews);
+module.exports.setReviews = setReviews;
