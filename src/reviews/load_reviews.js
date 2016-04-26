@@ -4,14 +4,14 @@ var reviewsSection = document.querySelector('.reviews');
 
 /** @param {function(Array.<Object>)} callback */
 var loadReviews = function(url, callback) {
-  var xhr = new XMLHttpRequest(),
-    XHR_UNSENT = 0,
-    XHR_OPENED = 1,
-    XHR_HEADERS_RECEIVED = 2,
-    XHR_LOADING = 3,
-    XHR_DONE = 4,
-    //REVIEWS_LOAD_URL = '//o0.github.io/assets/json/reviews.json',
-    XHR_TIMEOUT = 10000;
+  var xhr = new XMLHttpRequest();
+  var XHR_UNSENT = 0;
+  var XHR_OPENED = 1;
+  var XHR_HEADERS_RECEIVED = 2;
+  var XHR_LOADING = 3;
+  var XHR_DONE = 4;
+  //var REVIEWS_LOAD_URL = '//o0.github.io/assets/json/reviews.json';
+  var XHR_TIMEOUT = 10000;
 
   xhr.open('GET', url, true);
 

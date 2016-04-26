@@ -2,16 +2,16 @@
 
 var utils = require('../../utils/utils');
 
-var form = document.querySelector('form.review-form'),
-  reviewerName = form.querySelector('#review-name'),
-  reviewerNameError = form.querySelector('.review-name-error'),
-  reviewText = form.querySelector('#review-text'),
-  reviewTextError = form.querySelector('.review-text-error'),
-  reviewFields = form.querySelector('.review-fields'),
-  reviewFieldsName = form.querySelector('.review-fields-name'),
-  reviewFieldsText = form.querySelector('.review-fields-text'),
-  reviewMarks = form.querySelectorAll('input[name=review-mark]'),
-  formSubmitButton = form.querySelector('.review-submit');
+var form = document.querySelector('form.review-form');
+var reviewerName = form.querySelector('#review-name');
+var reviewerNameError = form.querySelector('.review-name-error');
+var reviewText = form.querySelector('#review-text');
+var reviewTextError = form.querySelector('.review-text-error');
+var reviewFields = form.querySelector('.review-fields');
+var reviewFieldsName = form.querySelector('.review-fields-name');
+var reviewFieldsText = form.querySelector('.review-fields-text');
+var reviewMarks = form.querySelectorAll('input[name=review-mark]');
+var formSubmitButton = form.querySelector('.review-submit');
 
 /**
  * Проверяет поля ввода.

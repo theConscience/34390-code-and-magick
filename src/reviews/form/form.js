@@ -4,16 +4,16 @@ var browserCookies = require('browser-cookies');
 var utils = require('../../utils/utils');
 var checkFields = require('./check_fields');
 
-var formContainer = document.querySelector('.overlay-container'),
-  form = formContainer.querySelector('form.review-form'),
-  formCloseButton = document.querySelector('.review-form-close'),
-  formSubmitButton = form.querySelector('.review-submit'),
-  formFields = form.querySelectorAll('#review-name, #review-text'),  // NodeList
-  reviewMarks = form.querySelectorAll('input[name=review-mark]'),  // NodeList
-  reviewMarksLabels = form.querySelectorAll('.review-mark-label'),
-  reviewerName = form.querySelector('#review-name'),
-  reviewFields = form.querySelector('.review-fields'),
-  reviewMark = 3;
+var formContainer = document.querySelector('.overlay-container');
+var form = formContainer.querySelector('form.review-form');
+var formCloseButton = document.querySelector('.review-form-close');
+var formSubmitButton = form.querySelector('.review-submit');
+var formFields = form.querySelectorAll('#review-name, #review-text');  // NodeList
+var reviewMarks = form.querySelectorAll('input[name=review-mark]');  // NodeList
+var reviewMarksLabels = form.querySelectorAll('.review-mark-label');
+var reviewerName = form.querySelector('#review-name');
+var reviewFields = form.querySelector('.review-fields');
+var reviewMark = 3;
 
 reviewFields.classList.add(utils.HIDDEN_CLASS_NAME);  // чтобы до начала ввода, при отсутствии куков - подсказки не появлялись
 reviewerName.value = browserCookies.get('reviewerName') || '';
@@ -131,18 +131,20 @@ var _getExpiringDate = function(birthMonth, birthDay) {
     console.log(Error('Please, enter valid month and date!'));
     return false;
   }
-  var now = new Date(),
-    nowMS = now.valueOf(),
-    thisYearBirthdayMS = now.setMonth(birthMonth - 1, birthDay),
-    expiresLengthMS = 0,
-    expiresDateMS = 0,
-    expiresDate = 0;
+  var now = new Date();
+  var nowMS = now.valueOf();
+  var thisYearBirthdayMS = now.setMonth(birthMonth - 1, birthDay);
+  var expiresLengthMS = null;
+  var expiresDateMS = null;
+  var expiresDate = null;
+  var lastYear = null;
+  var lastYearBirthdayMS = null;
 
   if (nowMS > thisYearBirthdayMS) {  // если день рождения был в этом году
     expiresLengthMS = nowMS - thisYearBirthdayMS;
   } else if (nowMS < thisYearBirthdayMS) {  // если день рождения был в прошлом году
-    var lastYear = now.getFullYear() - 1;
-    var lastYearBirthdayMS = now.setYear(lastYear, birthMonth - 1, birthDay);
+    lastYear = now.getFullYear() - 1;
+    lastYearBirthdayMS = now.setYear(lastYear, birthMonth - 1, birthDay);
     expiresLengthMS = nowMS - lastYearBirthdayMS;
   } else {  // если сегодня день рождения - ставим куки на год
     expiresLengthMS = 365 * 24 * 3600 * 1000;
