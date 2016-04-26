@@ -3,7 +3,7 @@
 var utils = require('../utils/utils');
 var Filter = require('./filters/filter_types');
 var filterReviews = require('./filters/filter_reviews');
-var renderReview = require('./render_review');
+var Review = require('./review');
 
 var reviewsFilter = document.querySelector('.reviews-filter'),
   reviewsListContainer = document.querySelector('.reviews-list'),
@@ -11,6 +11,9 @@ var reviewsFilter = document.querySelector('.reviews-filter'),
 
 /** @type {Array.<Object>} */
 var reviews = [];
+
+/** @type {Array.<Review>} */
+var renderedReviews = [];
 
 /** @type {Array.<Object>} */
 var filteredReviews = [];
@@ -37,16 +40,19 @@ reviewsFilter.classList.add('invisible');
  * @param {number} page
  * @param {boolean=} reload
  */
-var prepareReviewsToRender = function(reviewsToRender, page, reload) {
+var prepareToRenderReviews = function(reviewsToRender, page, reload) {
   if (reload) {
-    reviewsListContainer.innerHTML = '';
+    while (renderedReviews.length) {
+      var removedLastReview = renderedReviews.pop();
+      removedLastReview.remove();
+    }
   }
 
   var from = page * PAGE_SIZE;
   var to = from + PAGE_SIZE;
 
   reviewsToRender.slice(from, to).forEach(function(review) {
-    renderReview(review, reviewsListContainer);
+    renderedReviews.push(new Review(review, reviewsListContainer));
   });
   reviewsFilter.classList.remove('invisible');
 };
@@ -55,7 +61,7 @@ var prepareReviewsToRender = function(reviewsToRender, page, reload) {
 var setReviewsActiveFilter = function(filterId) {
   filteredReviews = filterReviews(reviews, filterId);
   pageNumber = 0;
-  prepareReviewsToRender(filteredReviews, pageNumber, true);
+  prepareToRenderReviews(filteredReviews, pageNumber, true);
   activeFilter.checked = false;
   activeFilterLabel.setAttribute('aria-checked', 'false');
   var activeFilterNew = document.querySelector('#' + filterId);
@@ -72,7 +78,8 @@ var setReviewsActiveFilter = function(filterId) {
 var setReviewsFiltersListeners = function() {
   reviewsFilter.addEventListener('click', function(evt) {
     if (evt.target.classList.contains('reviews-filter-item') &&
-      evt.target.getAttribute('for') !== activeFilter.id) {
+    evt.target.getAttribute('for') !== activeFilter.id) {
+      evt.preventDefault();
       var filterId = evt.target.getAttribute('for');
       setReviewsActiveFilter(filterId);
       setMoreReviewsListener();
@@ -80,7 +87,8 @@ var setReviewsFiltersListeners = function() {
   });
 
   reviewsFilter.addEventListener('keydown', function(evt) {
-    if (evt.target.classList.contains('reviews-filter-item') && utils.isActivationEvent(evt)) {
+    if (evt.target.classList.contains('reviews-filter-item') &&
+    utils.isActivationEvent(evt)) {
       evt.preventDefault();
       var filterId = evt.target.getAttribute('for');
       setReviewsActiveFilter(filterId);
@@ -95,10 +103,11 @@ var setReviewsFiltersListeners = function() {
  */
 var renderNextReviewPage = function(evt) {
   if (evt.type === 'click' ||
-    evt.type === 'keydown' && utils.isActivationEvent(evt)) {
+  evt.type === 'keydown' && utils.isActivationEvent(evt)) {
+    evt.preventDefault();
     if (utils.isNextPageAvailable(filteredReviews, pageNumber, PAGE_SIZE)) {
       pageNumber++;
-      prepareReviewsToRender(filteredReviews, pageNumber, false);
+      prepareToRenderReviews(filteredReviews, pageNumber, false);
     } else {
       if (!moreReviewsButton.classList.contains('invisible')) {
         moreReviewsButton.classList.add('invisible');

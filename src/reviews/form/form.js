@@ -69,6 +69,7 @@ var _isFormShown = function() {
  */
 var _onDocumentKeyDown = function(evt) {
   if (_isFormShown() && utils.isDeactivationEvent(evt)) {
+    evt.preventDefault();
     _hideForm();
   }
 };
@@ -111,6 +112,7 @@ utils.forEachNode(reviewMarks, function(index, node) {
 utils.forEachNode(reviewMarksLabels, function(index, node) {
   node.onkeydown = function(evt) {
     if (utils.isActivationEvent(evt)) {
+      evt.preventDefault();
       document.querySelector('#' + evt.target.getAttribute('for')).checked = true;
       checkFields(reviewMark);
     }
@@ -174,6 +176,7 @@ var _preSubmit = function(evt) {
  */
 var _onFormSubmitButtonKeyDown = function(evt) {
   if (utils.isActivationEvent(evt)) {
+    evt.preventDefault();
     _preSubmit();
     form.submit();
   }

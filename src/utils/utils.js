@@ -82,7 +82,7 @@ module.exports = {
    * @param {string} className
    * @return {boolean}
    */
-  hasAncestorWithClass: function(elem, className) {
+  hasOwnOrAncestorClass: function(elem, className) {
     while (elem.parentNode !== null) {
       if (elem.classList.contains(className) ||
       elem.parentNode.classList.contains(className)) {
@@ -92,6 +92,23 @@ module.exports = {
       }
     }
     return false;
+  },
+
+  /**
+   * Возвраща
+   * @param {HTMLElement} elem
+   * @param {string} className
+   * @return {HTMLElement}
+   */
+  getClosestWithClass: function(elem, className) {
+    while (elem.parentNode !== null) {
+      if (elem.classList.contains(className)) {
+        return elem;
+      } else {
+        elem = elem.parentNode;
+      }
+    }
+    return null;
   }
 
 };

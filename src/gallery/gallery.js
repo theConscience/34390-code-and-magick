@@ -112,6 +112,7 @@ var _isGalleryShown = function() {
 var _onDocumentKeyDown = function(evt) {
   if (_isGalleryShown()) {
     if (utils.isDeactivationEvent(evt)) {
+      evt.preventDefault();
       hideGallery();
     } else if (utils.isPreviousEvent(evt)) {
       galleryControlLeft.click();
@@ -127,6 +128,7 @@ var _onDocumentKeyDown = function(evt) {
  */
 var _onCloseClick = function(evt) {
   if (evt.type === 'click') {
+    evt.preventDefault();
     hideGallery();
   }
 };
@@ -138,6 +140,7 @@ var _onCloseClick = function(evt) {
 var _onCloseKeydown = function(evt) {
   if (evt.type === 'keydown' &&
   utils.isActivationEvent(evt)) {
+    evt.preventDefault();
     hideGallery();
   }
 };
@@ -149,6 +152,7 @@ var _onCloseKeydown = function(evt) {
 var _toPreviousPhoto = function(evt) {
   if (evt.type === 'click' ||
   evt.type === 'keydown' && utils.isActivationEvent(evt)) {
+    evt.preventDefault();
     if (photos.indexOf(activePhoto) === 0) {
       return;
     }
@@ -163,6 +167,7 @@ var _toPreviousPhoto = function(evt) {
 var _toNextPhoto = function(evt) {
   if (evt.type === 'click' ||
   evt.type === 'keydown' && utils.isActivationEvent(evt)) {
+    evt.preventDefault();
     if (photos.indexOf(activePhoto) === photos.length - 1) {
       return;
     }
