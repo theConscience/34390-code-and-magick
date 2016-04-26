@@ -13,8 +13,8 @@ var gallery = require('./gallery/gallery');
  * game initializing
  */
 
-var gameContainer = document.querySelector('.demo'),
-  game = new Game(gameContainer);
+var gameContainer = document.querySelector('.demo');
+var game = new Game(gameContainer);
 game.initializeLevelAndStart();
 game.setGameStatus(Verdict.INTRO);
 
@@ -62,13 +62,13 @@ loadReviews(REVIEWS_LOAD_URL, reviews.setReviews);
  * gallery initializing
  */
 
-var photoGallery = document.querySelector('.photogallery'),
-  photoGalleryScreenshots = photoGallery.querySelectorAll('img');  // NodeList
+var photoGallery = document.querySelector('.photogallery');
+var photoGalleryPictures = photoGallery.querySelectorAll('img');  // NodeList
 
 /**
  * @type {Array.<strings>}
  */
-var photos = gallery.savePhotos(photoGalleryScreenshots);
+var photos = gallery.savePhotos(photoGalleryPictures);
 
 var photoGalleryOnClick = function(evt) {
   if (utils.hasOwnOrAncestorClass(evt.target, 'photogallery-image')) {

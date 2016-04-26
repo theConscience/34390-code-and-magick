@@ -8,8 +8,8 @@ var Filter = require('./filter_types');
  * @return {Array.<Object>}
  */
 var filterReviews = function(reviewsToFilter, filter) {
-  var reviewsToFilterClone = reviewsToFilter.slice(0),
-    TWO_WEEKS_MS = 14 * 24 * 3600 * 1000;
+  var reviewsToFilterClone = reviewsToFilter.slice(0);
+  var TWO_WEEKS_MS = 14 * 24 * 3600 * 1000;
 
   switch (filter) {
     case Filter.RECENT:
