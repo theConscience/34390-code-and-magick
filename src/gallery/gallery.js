@@ -35,7 +35,7 @@ var Gallery = function() {
    */
   this.previewLoadTimeout = null;
 
-  var self = this;
+  var self = this;  // сохраняем ссылку на объект в замыкании, чтобы избежать потери контекста
 
   /**
    * Сохраняет значения атрибута src из всех картинок в блоке .photogallery в массив строк, возвращает его
