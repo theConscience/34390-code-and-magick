@@ -42,11 +42,6 @@ reviewsFilter.classList.add('invisible');
  */
 var prepareToRenderReviews = function(reviewsToRender, page, reload) {
   if (reload) {
-    // renderedReviews.forEach(function(review) {  // но есть способ красивее :)
-    //   review.remove();
-    // });
-    // renderedReviews = [];
-
     while (renderedReviews.length) {
       var removedLastReview = renderedReviews.pop();
       removedLastReview.remove();
@@ -83,7 +78,8 @@ var setReviewsActiveFilter = function(filterId) {
 var setReviewsFiltersListeners = function() {
   reviewsFilter.addEventListener('click', function(evt) {
     if (evt.target.classList.contains('reviews-filter-item') &&
-      evt.target.getAttribute('for') !== activeFilter.id) {
+    evt.target.getAttribute('for') !== activeFilter.id) {
+      evt.preventDefault();
       var filterId = evt.target.getAttribute('for');
       setReviewsActiveFilter(filterId);
       setMoreReviewsListener();
@@ -91,7 +87,8 @@ var setReviewsFiltersListeners = function() {
   });
 
   reviewsFilter.addEventListener('keydown', function(evt) {
-    if (evt.target.classList.contains('reviews-filter-item') && utils.isActivationEvent(evt)) {
+    if (evt.target.classList.contains('reviews-filter-item') &&
+    utils.isActivationEvent(evt)) {
       evt.preventDefault();
       var filterId = evt.target.getAttribute('for');
       setReviewsActiveFilter(filterId);
@@ -106,7 +103,8 @@ var setReviewsFiltersListeners = function() {
  */
 var renderNextReviewPage = function(evt) {
   if (evt.type === 'click' ||
-    evt.type === 'keydown' && utils.isActivationEvent(evt)) {
+  evt.type === 'keydown' && utils.isActivationEvent(evt)) {
+    evt.preventDefault();
     if (utils.isNextPageAvailable(filteredReviews, pageNumber, PAGE_SIZE)) {
       pageNumber++;
       prepareToRenderReviews(filteredReviews, pageNumber, false);

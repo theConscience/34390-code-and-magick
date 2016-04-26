@@ -102,8 +102,7 @@ module.exports = {
    */
   getClosestWithClass: function(elem, className) {
     while (elem.parentNode !== null) {
-      if (elem.classList.contains(className) ||
-      elem.parentNode.classList.contains(className)) {
+      if (elem.classList.contains(className)) {
         return elem;
       } else {
         elem = elem.parentNode;
