@@ -71,7 +71,7 @@ var photoGallery = document.querySelector('.photogallery'),
 var photos = gallery.savePhotos(photoGalleryScreenshots);
 
 var photoGalleryOnClick = function(evt) {
-  if (utils.hasAncestorWithClass(evt.target, 'photogallery-image')) {
+  if (utils.hasOwnOrAncestorClass(evt.target, 'photogallery-image')) {
     evt.preventDefault();
     //game.pauseLevel();
     gallery.showGallery(photos.indexOf(evt.target.src || evt.target.querySelector('img').src));
@@ -79,7 +79,7 @@ var photoGalleryOnClick = function(evt) {
 };
 
 var photoGalleryOnKeyDown = function(evt) {
-  if (utils.hasAncestorWithClass(evt.target, 'photogallery-image') &&
+  if (utils.hasOwnOrAncestorClass(evt.target, 'photogallery-image') &&
   utils.isActivationEvent(evt)) {
     evt.preventDefault();
     //game.pauseLevel();
