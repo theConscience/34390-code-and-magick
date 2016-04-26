@@ -18,17 +18,17 @@ if ('content' in reviewTemplate) {  // находим шаблон
  * @return {HTMLElement}
  */
 var createReviewElement = function(review) {
-  var element = reviewElementToClone.cloneNode(true),
-    image = new Image(124, 124),
-    imageLoadTimeout,
-    IMAGE_TIMEOUT = 10000,
-    authorImage = element.querySelector('.review-author'),
-    reviewText = element.querySelector('.review-text'),
-    reviewRating = element.querySelector('.review-rating'),
-    RATING_TWO_CLASS = 'review-rating-two',
-    RATING_THREE_CLASS = 'review-rating-three',
-    RATING_FOUR_CLASS = 'review-rating-four',
-    RATING_FIVE_CLASS = 'review-rating-five';
+  var element = reviewElementToClone.cloneNode(true);
+  var image = new Image(124, 124);
+  var imageLoadTimeout;
+  var IMAGE_TIMEOUT = 10000;
+  var authorImage = element.querySelector('.review-author');
+  var reviewText = element.querySelector('.review-text');
+  var reviewRating = element.querySelector('.review-rating');
+  var RATING_TWO_CLASS = 'review-rating-two';
+  var RATING_THREE_CLASS = 'review-rating-three';
+  var RATING_FOUR_CLASS = 'review-rating-four';
+  var RATING_FIVE_CLASS = 'review-rating-five';
 
   switch (review.rating) {
     case 2:

@@ -495,13 +495,13 @@ Game.prototype = {
     popupLeftSideCoord = popupLeftSideCoord || 0;
     popupTopSideCoord = popupTopSideCoord || 0;
 
-    var words = messageText.split(' '),
-      lines = [],
-      wordsInLine = [],
-      wordsInLineLength = 0,
-      paddingWidth = 20,
-      lineHeight = 20,
-      rowNumber = 1;
+    var words = messageText.split(' ');
+    var lines = [];
+    var wordsInLine = [];
+    var wordsInLineLength = 0;
+    var paddingWidth = 20;
+    var lineHeight = 20;
+    var rowNumber = 1;
 
     var generateLines = function(word, index, arr) {
       wordsInLineLength += this.ctx.measureText(word + ' ').width;

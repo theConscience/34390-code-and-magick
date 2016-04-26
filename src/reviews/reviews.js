@@ -5,9 +5,9 @@ var Filter = require('./filters/filter_types');
 var filterReviews = require('./filters/filter_reviews');
 var Review = require('./review');
 
-var reviewsFilter = document.querySelector('.reviews-filter'),
-  reviewsListContainer = document.querySelector('.reviews-list'),
-  moreReviewsButton = document.querySelector('.reviews-controls-more');
+var reviewsFilter = document.querySelector('.reviews-filter');
+var reviewsListContainer = document.querySelector('.reviews-list');
+var moreReviewsButton = document.querySelector('.reviews-controls-more');
 
 /** @type {Array.<Object>} */
 var reviews = [];
