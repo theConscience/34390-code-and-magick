@@ -25,7 +25,7 @@ var activeFilter = document.querySelector('input[name=reviews]:checked');
 var activeFilterLabel = document.querySelector('label[for=' + activeFilter.id + ']');
 
 /** @constant {string} */
-var DEFAULT_FILTER = Filter.ALL;
+var DEFAULT_FILTER = localStorage.getItem('lastReviewsFilter') || Filter.ALL;
 
 /** @constant {number} */
 var PAGE_SIZE = 3;
@@ -70,6 +70,7 @@ var setReviewsActiveFilter = function(filterId) {
   activeFilterLabelNew.setAttribute('aria-checked', 'true');
   activeFilter = activeFilterNew;
   activeFilterLabel = activeFilterLabelNew;
+  localStorage.setItem('lastReviewsFilter', filterId);
 };
 
 /**
