@@ -33,13 +33,6 @@ var Gallery = function() {
   /**  @type {regexp} */
   this.hashRegExp = /#photo\/(\S+)/;
 
-  // /**
-  //  * Webpack меняет пути к картинкам на абсолютные, поэтому в массив photos попадают абсолютные пути
-  //  * эта регулярка используется для отделения абсолютной части
-  //  * @type {regexp}
-  //  */
-  // this.photoAbsPathPrefixRegExp = /(\S+\/)*img\/\S+/;
-
   /**
    * Webpack меняет пути к картинкам на абсолютные, поэтому в массив photos попадают абсолютные пути
    * эта регулярка используется для отделения относительной части
@@ -63,33 +56,17 @@ var Gallery = function() {
     return self.photos;
   };
 
-  // /**
-  //  * Сохраняет абсолютную часть пути из src всех картинок в блоке
-  //  * .photogallery в массив строк, возвращает его
-  //  * @param {Array.<objects>} photos
-  //  * @return {Array.<strings>}
-  //  */
-  // this.savePhotosAbsPrefixes = function(photosObjects) {
-  //   utils.forEachNode(photosObjects, function(index, node) {
-  //     self.photosAbsPathsPrefixes[index] = node.src.match(self.photoAbsPathPrefixRegExp)[1];
-  //   });
-  //   return self.photosAbsPathsPrefixes;
-  // };
-
   /**
    * Отображает внутри фотогалереи изображение по номеру
    * @param {number} photoNumber
-   * @private
    */
-  this._showPhoto = function(photoIdentifier) {
+  this.showPhoto = function(photoIdentifier) {
     var photoNumber = null;
     var photoSrc = '';
 
     if (typeof photoIdentifier === 'string') {
       photoSrc = photoIdentifier.match(this.hashRegExp)[1];
-      console.log('_showPhoto photoSrc =', photoSrc);
       photoNumber = self.photos.indexOf(photoSrc);
-      console.log('_showPhoto photoNumber =', photoNumber);
     } else if (typeof photoIdentifier === 'number') {
       photoNumber = photoIdentifier;
     }
@@ -201,14 +178,9 @@ var Gallery = function() {
         return;
       }
 
-      console.log('_toPreviousPhoto self.activePhoto =', self.activePhoto);
       var activePhotoNumber = self.photos.indexOf(self.activePhoto) - 1;
-      console.log('_toPreviousPhoto activePhotoNumber =', activePhotoNumber);
       var newPhotoSrc = self.photos[activePhotoNumber];
-      console.log('_toPreviousPhoto newPhotoSrc =', newPhotoSrc);
       window.location.hash = '#photo/' + newPhotoSrc;
-
-      // self._showPhoto(self.photos.indexOf(self.activePhoto) - 1);
     }
   };
 
@@ -224,14 +196,9 @@ var Gallery = function() {
         return;
       }
 
-      console.log('_toNextPhoto self.activePhoto =', self.activePhoto);
       var activePhotoNumber = self.photos.indexOf(self.activePhoto) + 1;
-      console.log('_toNextPhoto activePhotoNumber =', activePhotoNumber);
       var newPhotoSrc = self.photos[activePhotoNumber];
-      console.log('_toNextPhoto newPhotoSrc =', newPhotoSrc);
       window.location.hash = '#photo/' + newPhotoSrc;
-
-      //self._showPhoto(self.photos.indexOf(self.activePhoto) + 1);
     }
   };
 
@@ -240,7 +207,7 @@ var Gallery = function() {
    * @param {number} photoNumber
    */
   this.showGallery = function(photoIdentifier) {
-    self._showPhoto(photoIdentifier);
+    self.showPhoto(photoIdentifier);
     self.galleryOverlay.classList.remove(utils.HIDDEN_CLASS_NAME);
     document.addEventListener('keydown', self._onDocumentKeyDown);  // вешаем обработчик нажатия клавиши ESC на документ
     self.galleryClose.addEventListener('click', self._onCloseClick);  // вешаем обработчик клика по кнопке закрытия

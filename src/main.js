@@ -92,15 +92,9 @@ var photoGalleryOnClick = function(evt) {
   if (utils.hasOwnOrAncestorClass(evt.target, 'photogallery-image')) {
     evt.preventDefault();
     newSrc = evt.target.src || evt.target.querySelector('img').src;
-    console.log('photoGalleryOnClick newSrc =', newSrc);
     newSrcData = newSrc.match(gallery.hashRegExp) || newSrc.match(gallery.photoRelPathPrefixRegExp);
-    console.log('photoGalleryOnClick newSrcData =', newSrcData);
     newHash = '#photo/' + newSrcData[1];
-
     window.location.hash = newHash;
-    console.log('photoGalleryOnClick new window hash on click =', newHash);
-    //game.pauseLevel();
-    //gallery.showGallery(photos.indexOf(evt.target.src || evt.target.querySelector('img').src));
   }
 };
 
@@ -113,41 +107,27 @@ var photoGalleryOnKeyDown = function(evt) {
   utils.isActivationEvent(evt)) {
     evt.preventDefault();
     newSrc = evt.target.src || evt.target.querySelector('img').src;
-    console.log('photoGalleryOnKeyDown newSrc =', newSrc);
     newSrcData = newSrc.match(gallery.hashRegExp) || newSrc.match(gallery.photoRelPathPrefixRegExp);
-    console.log('photoGalleryOnKeyDown newSrcData =', newSrcData);
     newHash = '#photo/' + newSrcData[1];
-
     window.location.hash = newHash;
-    console.log('photoGalleryOnKeyDown new window hash on key down =', newHash);
-    //game.pauseLevel();
-    //gallery.showGallery(photos.indexOf(evt.target.querySelector('img').src));
   }
 };
 
 var onHashChange = function(evt) {
-  console.log(gallery.photos);
-  console.log(photos);
   var galleryWasOpen = Boolean(evt.oldURL.match(gallery.hashRegExp));
-  console.log('onHashChange galleryWasOpen =', galleryWasOpen);
-  console.log('onHashChange  evt.newURL =', evt.newURL);
-  console.log('onHashChange evt.newURL.match(gallery.hashRegExp)', evt.newURL.match(gallery.hashRegExp));
   var galleryHash = evt.newURL.match(gallery.hashRegExp)[0];
-  console.log('onHashChange galleryHash', galleryHash);
-  console.log('onHashChange location hash was changed to', evt.newURL);
-  if (galleryHash) {
+  if (!galleryWasOpen && galleryHash) {  // если галерея закрыта и мы получили хэш - открываем галерею, а она покажет фото
     gallery.showGallery(galleryHash);
-  } else if (galleryWasOpen && !galleryHash) {
+  } else if (galleryWasOpen && galleryHash) {  // если галерея уже открыта и мы получили хэш - просто показываем фото
+    gallery.showPhoto(galleryHash);
+  } else if (galleryWasOpen && !galleryHash) {  // если галерея уже открыта а хэш стал пустым - закрываем галерею
     gallery.hideGallery();
   }
 };
 
-var onWindowLoad = function() {
-  console.log('onWindowLoad  window.location =', window.location);
-  console.log('onWindowLoad window.location.href.match(gallery.hashRegExp)', window.location.href.match(gallery.hashRegExp));
+var onLoadHashCheck = function() {
   if (window.location.href.match(gallery.hashRegExp)) {
     var galleryHash = window.location.href.match(gallery.hashRegExp)[0];
-    console.log('onWindowLoad galleryHash', galleryHash);
     if (galleryHash) {
       gallery.showGallery(galleryHash);
     }
@@ -157,4 +137,4 @@ var onWindowLoad = function() {
 photoGallery.addEventListener('click', photoGalleryOnClick);  // вешаем делегированный обработчик клика по фото на контейнер с фотографиями
 photoGallery.addEventListener('keydown', photoGalleryOnKeyDown);  // вешаем делегированный обработчик нажатия клавиши при фокусе на фото, на контейнер с фотографиями
 window.addEventListener('hashchange', onHashChange); // вешаем обработчик события изменения location.hash на window
-window.addEventListener('load', onWindowLoad); // проверяем location.hash при загрузке страницыы
+window.addEventListener('load', onLoadHashCheck); // проверяем location.hash при загрузке страницыы
