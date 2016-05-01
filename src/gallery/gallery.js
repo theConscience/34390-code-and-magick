@@ -63,7 +63,7 @@ Gallery.prototype.savePhotos = function(photosObjects) {
   for (var i = 0; i < photosObjects.length; i++) {
     this.photos[i] = photosObjects[i].src.match(this.photoRelPathPrefixRegExp)[1];
   }
-  console.log('Gallery.prototype.savePhotos this =', this);
+
   this.galleryPreviewNumberTotal.textContent = this.photos.length;
   return this.photos;
 };
@@ -75,7 +75,7 @@ Gallery.prototype.savePhotos = function(photosObjects) {
 Gallery.prototype.showPhoto = function(photoIdentifier) {
   var photoNumber = null;
   var photoSrc = '';
-  console.log('Gallery.prototype.showPhoto this =', this);
+
   if (typeof photoIdentifier === 'string') {
     photoSrc = photoIdentifier.match(this.hashRegExp)[1];
     photoNumber = this.photos.indexOf(photoSrc);

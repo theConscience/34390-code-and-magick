@@ -135,9 +135,7 @@ var onLoadHashCheck = function() {
   }
 };
 
-console.log('gallery.photos before save', gallery.photos);
 gallery.savePhotos(photoGalleryPictures);
-console.log('gallery.photos after save', gallery.photos);
 photoGallery.addEventListener('click', photoGalleryOnClick);  // вешаем делегированный обработчик клика по фото на контейнер с фотографиями
 photoGallery.addEventListener('keydown', photoGalleryOnKeyDown);  // вешаем делегированный обработчик нажатия клавиши при фокусе на фото, на контейнер с фотографиями
 window.addEventListener('hashchange', onHashChange); // вешаем обработчик события изменения location.hash на window
