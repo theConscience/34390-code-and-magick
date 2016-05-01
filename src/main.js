@@ -72,9 +72,6 @@ var photoGallery = document.querySelector('.photogallery');
 /** @type {HTMLElement} */
 var photoGalleryPictures = photoGallery.querySelectorAll('img');  // NodeList
 
-/** @type {Array.<strings>} */
-var photos = gallery.savePhotos(photoGalleryPictures);
-
 /** @type {string} */
 var newSrc = null;
 
@@ -114,8 +111,12 @@ var photoGalleryOnKeyDown = function(evt) {
 };
 
 var onHashChange = function(evt) {
+  var galleryHash = null;
   var galleryWasOpen = Boolean(evt.oldURL.match(gallery.hashRegExp));
-  var galleryHash = evt.newURL.match(gallery.hashRegExp)[0];
+  var galleryHashData = evt.newURL.match(gallery.hashRegExp);
+  if (galleryHashData) {
+    galleryHash = galleryHashData[0];
+  }
   if (!galleryWasOpen && galleryHash) {  // если галерея закрыта и мы получили хэш - открываем галерею, а она покажет фото
     gallery.showGallery(galleryHash);
   } else if (galleryWasOpen && galleryHash) {  // если галерея уже открыта и мы получили хэш - просто показываем фото
@@ -134,6 +135,9 @@ var onLoadHashCheck = function() {
   }
 };
 
+console.log('gallery.photos before save', gallery.photos);
+gallery.savePhotos(photoGalleryPictures);
+console.log('gallery.photos after save', gallery.photos);
 photoGallery.addEventListener('click', photoGalleryOnClick);  // вешаем делегированный обработчик клика по фото на контейнер с фотографиями
 photoGallery.addEventListener('keydown', photoGalleryOnKeyDown);  // вешаем делегированный обработчик нажатия клавиши при фокусе на фото, на контейнер с фотографиями
 window.addEventListener('hashchange', onHashChange); // вешаем обработчик события изменения location.hash на window

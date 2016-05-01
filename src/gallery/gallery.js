@@ -30,208 +30,229 @@ var Gallery = function() {
   /**  @type {number} */
   this.previewLoadTimeout = null;
 
-  /**  @type {regexp} */
+  /**  @type {RegExp} */
   this.hashRegExp = /#photo\/(\S+)/;
 
   /**
    * Webpack меняет пути к картинкам на абсолютные, поэтому в массив photos попадают абсолютные пути
    * эта регулярка используется для отделения относительной части
-   * @type {regexp}
+   * @type {RegExp}
    */
   this.photoRelPathPrefixRegExp = /(img\/\S+)/;
 
-  var self = this;  // сохраняем ссылку на объект в замыкании, чтобы избежать потери контекста
+  //this.savePhotos = this.savePhotos.bind(this);  // это не обязательно, т.к. метод всегда вызывается с контекстом галереи.
 
-  /**
-   * Сохраняет относительную часть пути из значения атрибута src всех картинок
-   * в блоке .photogallery в массив строк, возвращает его
-   * @param {Array.<objects>} photos
-   * @return {Array.<strings>}
-   */
-  this.savePhotos = function(photosObjects) {
-    utils.forEachNode(photosObjects, function(index, node) {
-      self.photos[index] = node.src.match(self.photoRelPathPrefixRegExp)[1];
+  //this.showPhoto = this.showPhoto.bind(this);  // это не обязательно, т.к. метод всегда вызывается с контекстом галереи.
+
+  this._isGalleryShown = this._isGalleryShown.bind(this);
+
+  this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
+
+  this._onCloseClick = this._onCloseClick.bind(this);
+
+  this._onCloseKeydown = this._onCloseKeydown.bind(this);
+
+  this._toPreviousPhoto = this._toPreviousPhoto.bind(this);
+
+  this._toNextPhoto = this._toNextPhoto.bind(this);
+
+  //this.showGallery = this.showGallery.bind(this);  // это не обязательно, т.к. метод всегда вызывается с контекстом галереи.
+
+  //this.hideGallery = this.hideGallery.bind(this);  // это не обязательно, т.к. метод всегда вызывается с контекстом галереи.
+};
+
+/**
+ * Сохраняет относительную часть пути из значения атрибута src всех картинок
+ * в блоке .photogallery в массив строк, возвращает его
+ * @param {Array.<objects>} photos
+ * @return {Array.<strings>}
+ */
+Gallery.prototype.savePhotos = function(photosObjects) {
+  for (var i = 0; i < photosObjects.length; i++) {
+    this.photos[i] = photosObjects[i].src.match(this.photoRelPathPrefixRegExp)[1];
+  }
+  console.log('Gallery.prototype.savePhotos this =', this);
+  this.galleryPreviewNumberTotal.textContent = this.photos.length;
+  return this.photos;
+};
+
+/**
+ * Отображает внутри фотогалереи изображение по номеру
+ * @param {number} photoNumber
+ */
+Gallery.prototype.showPhoto = function(photoIdentifier) {
+  var photoNumber = null;
+  var photoSrc = '';
+  console.log('Gallery.prototype.showPhoto this =', this);
+  if (typeof photoIdentifier === 'string') {
+    photoSrc = photoIdentifier.match(this.hashRegExp)[1];
+    photoNumber = this.photos.indexOf(photoSrc);
+  } else if (typeof photoIdentifier === 'number') {
+    photoNumber = photoIdentifier;
+  }
+
+  if (photoNumber > -1) {
+    this.galleryPreviewNumberCurrent.textContent = photoNumber + 1;
+
+    if (photoNumber === 0) {  // скрываем соответствующие стрелки, если больше нечего показывать
+      this.galleryControlLeft.classList.add(utils.HIDDEN_CLASS_NAME);
+    } else if (photoNumber >= this.photos.length - 1) {
+      this.galleryControlRight.classList.add(utils.HIDDEN_CLASS_NAME);
+    }
+
+    if (photoNumber !== 0 &&  // показываем стрелку влево, если была скрыта
+    this.galleryControlLeft.classList.contains(utils.HIDDEN_CLASS_NAME)) {
+      this.galleryControlLeft.classList.remove(utils.HIDDEN_CLASS_NAME);
+    }
+    if (photoNumber < this.photos.length - 1 &&  // показываем стрелку вправо, если была скрыта
+    this.galleryControlRight.classList.contains(utils.HIDDEN_CLASS_NAME)) {
+      this.galleryControlRight.classList.remove(utils.HIDDEN_CLASS_NAME);
+    }
+
+    if (this.galleryPreview.querySelector('img') !== null) {  // если внутри галереи уже загружена картинка - убираем
+      this.galleryPreview.removeChild(this.galleryPreview.querySelector('img'));
+    }
+
+    var preview = new Image();
+
+    var onPreviewLoad = function() {
+      clearTimeout(this.previewLoadTimeout);
+      this.galleryPreview.appendChild(preview);
+    };
+
+    preview.addEventListener('load', onPreviewLoad.bind(this));
+
+    preview.addEventListener('error', function() {
+      console.log(Error('Can not load photo!'));
     });
-    self.galleryPreviewNumberTotal.textContent = self.photos.length;
-    return self.photos;
-  };
 
-  /**
-   * Отображает внутри фотогалереи изображение по номеру
-   * @param {number} photoNumber
-   */
-  this.showPhoto = function(photoIdentifier) {
-    var photoNumber = null;
-    var photoSrc = '';
+    this.previewLoadTimeout = setTimeout(function() {
+      preview.src = '';
+      console.log(Error('Preview loading stops on timeout!'));
+    }, this.PREVIEW_TIMEOUT);
 
-    if (typeof photoIdentifier === 'string') {
-      photoSrc = photoIdentifier.match(this.hashRegExp)[1];
-      photoNumber = self.photos.indexOf(photoSrc);
-    } else if (typeof photoIdentifier === 'number') {
-      photoNumber = photoIdentifier;
-    }
+    preview.src = this.activePhoto = this.photos[photoNumber];
+  } else {
+    console.log(Error('No such photo!'));
+  }
+};
 
-    if (photoNumber > -1) {
-      self.galleryPreviewNumberCurrent.textContent = photoNumber + 1;
+/**
+ * Проверяет, открыта ли галерея
+ * @private
+ */
+Gallery.prototype._isGalleryShown = function() {
+  if (this.galleryOverlay.classList.contains(utils.HIDDEN_CLASS_NAME)) {
+    return false;
+  }
+  return true;
+};
 
-      if (photoNumber === 0) {  // скрываем соответствующие стрелки, если больше нечего показывать
-        self.galleryControlLeft.classList.add(utils.HIDDEN_CLASS_NAME);
-      } else if (photoNumber >= self.photos.length - 1) {
-        self.galleryControlRight.classList.add(utils.HIDDEN_CLASS_NAME);
-      }
-
-      if (photoNumber !== 0 &&  // показываем стрелку влево, если была скрыта
-      self.galleryControlLeft.classList.contains(utils.HIDDEN_CLASS_NAME)) {
-        self.galleryControlLeft.classList.remove(utils.HIDDEN_CLASS_NAME);
-      }
-      if (photoNumber < self.photos.length - 1 &&  // показываем стрелку вправо, если была скрыта
-      self.galleryControlRight.classList.contains(utils.HIDDEN_CLASS_NAME)) {
-        self.galleryControlRight.classList.remove(utils.HIDDEN_CLASS_NAME);
-      }
-
-      if (self.galleryPreview.querySelector('img') !== null) {  // если внутри галереи уже загружена картинка - убираем
-        self.galleryPreview.removeChild(self.galleryPreview.querySelector('img'));
-      }
-
-      var preview = new Image();
-
-      preview.addEventListener('load', function() {
-        clearTimeout(self.previewLoadTimeout);
-        self.galleryPreview.appendChild(preview);
-      });
-
-      preview.addEventListener('error', function() {
-        console.log(Error('Can not load photo!'));
-      });
-
-      self.previewLoadTimeout = setTimeout(function() {
-        preview.src = '';
-        console.log(Error('Preview loading stops on timeout!'));
-      }, self.PREVIEW_TIMEOUT);
-
-      preview.src = self.activePhoto = self.photos[photoNumber];
-    } else {
-      console.log(Error('No such photo!'));
-    }
-  };
-
-  /**
-   * Проверяет, открыта ли галерея
-   * @private
-   */
-  this._isGalleryShown = function() {
-    if (self.galleryOverlay.classList.contains(utils.HIDDEN_CLASS_NAME)) {
-      return false;
-    }
-    return true;
-  };
-
-  /**
-   * @param {KeyboardsEvent} evt
-   * @private
-   */
-  this._onDocumentKeyDown = function(evt) {
-    if (self._isGalleryShown()) {
-      if (utils.isDeactivationEvent(evt)) {
-        evt.preventDefault();
-        self.hideGallery();
-      } else if (utils.isPreviousEvent(evt)) {
-        self.galleryControlLeft.click();
-      } else if (utils.isNextEvent(evt)) {
-        self.galleryControlRight.click();
-      }
-    }
-  };
-
-  /**
-   * @param {MouseEvent} evt
-   * @private
-   */
-  this._onCloseClick = function(evt) {
-    if (evt.type === 'click') {
+/**
+ * @param {KeyboardsEvent} evt
+ * @private
+ */
+Gallery.prototype._onDocumentKeyDown = function(evt) {
+  if (this._isGalleryShown()) {
+    if (utils.isDeactivationEvent(evt)) {
       evt.preventDefault();
-      self.hideGallery();
+      this.hideGallery();
+    } else if (utils.isPreviousEvent(evt)) {
+      this.galleryControlLeft.click();
+    } else if (utils.isNextEvent(evt)) {
+      this.galleryControlRight.click();
     }
-  };
+  }
+};
 
-  /**
-   * @param {KeyboardsEvent} evt
-   * @private
-   */
-  this._onCloseKeydown = function(evt) {
-    if (evt.type === 'keydown' &&
-    utils.isActivationEvent(evt)) {
-      evt.preventDefault();
-      self.hideGallery();
+/**
+ * @param {MouseEvent} evt
+ * @private
+ */
+Gallery.prototype._onCloseClick = function(evt) {
+  if (evt.type === 'click') {
+    evt.preventDefault();
+    this.hideGallery();
+  }
+};
+
+/**
+ * @param {KeyboardsEvent} evt
+ * @private
+ */
+Gallery.prototype._onCloseKeydown = function(evt) {
+  if (evt.type === 'keydown' &&
+  utils.isActivationEvent(evt)) {
+    evt.preventDefault();
+    this.hideGallery();
+  }
+};
+
+/**
+ * @param {Event} evt
+ * @private
+ */
+Gallery.prototype._toPreviousPhoto = function(evt) {
+  if (evt.type === 'click' ||
+  evt.type === 'keydown' && utils.isActivationEvent(evt)) {
+    evt.preventDefault();
+    if (this.photos.indexOf(this.activePhoto) === 0) {
+      return;
     }
-  };
 
-  /**
-   * @param {Event} evt
-   * @private
-   */
-  this._toPreviousPhoto = function(evt) {
-    if (evt.type === 'click' ||
-    evt.type === 'keydown' && utils.isActivationEvent(evt)) {
-      evt.preventDefault();
-      if (self.photos.indexOf(self.activePhoto) === 0) {
-        return;
-      }
+    var activePhotoNumber = this.photos.indexOf(this.activePhoto) - 1;
+    var newPhotoSrc = this.photos[activePhotoNumber];
+    window.location.hash = '#photo/' + newPhotoSrc;
+  }
+};
 
-      var activePhotoNumber = self.photos.indexOf(self.activePhoto) - 1;
-      var newPhotoSrc = self.photos[activePhotoNumber];
-      window.location.hash = '#photo/' + newPhotoSrc;
+/**
+ * @param {Event} evt
+ * @private
+ */
+Gallery.prototype._toNextPhoto = function(evt) {
+  if (evt.type === 'click' ||
+  evt.type === 'keydown' && utils.isActivationEvent(evt)) {
+    evt.preventDefault();
+    if (this.photos.indexOf(this.activePhoto) === this.photos.length - 1) {
+      return;
     }
-  };
 
-  /**
-   * @param {Event} evt
-   * @private
-   */
-  this._toNextPhoto = function(evt) {
-    if (evt.type === 'click' ||
-    evt.type === 'keydown' && utils.isActivationEvent(evt)) {
-      evt.preventDefault();
-      if (self.photos.indexOf(self.activePhoto) === self.photos.length - 1) {
-        return;
-      }
+    var activePhotoNumber = this.photos.indexOf(this.activePhoto) + 1;
+    var newPhotoSrc = this.photos[activePhotoNumber];
+    window.location.hash = '#photo/' + newPhotoSrc;
+  }
+};
 
-      var activePhotoNumber = self.photos.indexOf(self.activePhoto) + 1;
-      var newPhotoSrc = self.photos[activePhotoNumber];
-      window.location.hash = '#photo/' + newPhotoSrc;
-    }
-  };
+/**
+ * Отображает фотогалерею, навешивает обработчики на кнопки
+ * @param {number} photoNumber
+ */
+Gallery.prototype.showGallery = function(photoIdentifier) {
+  this.showPhoto(photoIdentifier);
+  this.galleryOverlay.classList.remove(utils.HIDDEN_CLASS_NAME);
+  document.addEventListener('keydown', this._onDocumentKeyDown);  // вешаем обработчик нажатия клавиши ESC на документ
+  this.galleryClose.addEventListener('click', this._onCloseClick);  // вешаем обработчик клика по кнопке закрытия
+  this.galleryClose.addEventListener('keydown', this._onCloseKeydown);  // вешаем обработчик нажатия клавиши по кнопке закрытия
+  this.galleryControlLeft.addEventListener('click', this._toPreviousPhoto);  // вешаем обработчик клика по левому переключателю в галерее
+  this.galleryControlLeft.addEventListener('keydown', this._toPreviousPhoto);  // вешаем обработчик нажатия клавиши по левому переключателю в галерее
+  this.galleryControlRight.addEventListener('click', this._toNextPhoto);  // вешаем обработчик клика по правому переключателю в галерее
+  this.galleryControlRight.addEventListener('keydown', this._toNextPhoto);  // вешаем обработчик нажатия клавиши по правому переключателю в галерее
+};
 
-  /**
-   * Отображает фотогалерею, навешивает обработчики на кнопки
-   * @param {number} photoNumber
-   */
-  this.showGallery = function(photoIdentifier) {
-    self.showPhoto(photoIdentifier);
-    self.galleryOverlay.classList.remove(utils.HIDDEN_CLASS_NAME);
-    document.addEventListener('keydown', self._onDocumentKeyDown);  // вешаем обработчик нажатия клавиши ESC на документ
-    self.galleryClose.addEventListener('click', self._onCloseClick);  // вешаем обработчик клика по кнопке закрытия
-    self.galleryClose.addEventListener('keydown', self._onCloseKeydown);  // вешаем обработчик нажатия клавиши по кнопке закрытия
-    self.galleryControlLeft.addEventListener('click', self._toPreviousPhoto);  // вешаем обработчик клика по левому переключателю в галерее
-    self.galleryControlLeft.addEventListener('keydown', self._toPreviousPhoto);  // вешаем обработчик нажатия клавиши по левому переключателю в галерее
-    self.galleryControlRight.addEventListener('click', self._toNextPhoto);  // вешаем обработчик клика по правому переключателю в галерее
-    self.galleryControlRight.addEventListener('keydown', self._toNextPhoto);  // вешаем обработчик нажатия клавиши по правому переключателю в галерее
-  };
-
-  /**
-   * Скрывает фотогалерею, снимает обработчики с кнопок
-   */
-  this.hideGallery = function() {
-    self.galleryOverlay.classList.add(utils.HIDDEN_CLASS_NAME);
-    document.removeEventListener('keydown', self._onDocumentKeyDown);  // снимаем обработчик нажатия клавиши ESC на документ
-    self.galleryClose.removeEventListener('click', self._onCloseClick);  // снимаем обработчик клика по кнопке закрытия
-    self.galleryClose.removeEventListener('keydown', self._onCloseKeydown);  // снимаем обработчик нажатия клавиши по кнопке закрытия
-    self.galleryControlLeft.removeEventListener('click', self._toPreviousPhoto);  // снимаем обработчик клика по левому переключателю в галерее
-    self.galleryControlLeft.removeEventListener('keydown', self._toPreviousPhoto);  // снимаем обработчик нажатия клавиши по левому переключателю в галерее
-    self.galleryControlRight.removeEventListener('click', self._toNextPhoto);  // снимаем обработчик клика по правому переключателю в галерее
-    self.galleryControlRight.removeEventListener('keydown', self._toNextPhoto);  // снимаем обработчик нажатия клавиши по правому переключателю в галерее
-    window.location.hash = '';
-  };
+/**
+ * Скрывает фотогалерею, снимает обработчики с кнопок
+ */
+Gallery.prototype.hideGallery = function() {
+  this.galleryOverlay.classList.add(utils.HIDDEN_CLASS_NAME);
+  document.removeEventListener('keydown', this._onDocumentKeyDown);  // снимаем обработчик нажатия клавиши ESC на документ
+  this.galleryClose.removeEventListener('click', this._onCloseClick);  // снимаем обработчик клика по кнопке закрытия
+  this.galleryClose.removeEventListener('keydown', this._onCloseKeydown);  // снимаем обработчик нажатия клавиши по кнопке закрытия
+  this.galleryControlLeft.removeEventListener('click', this._toPreviousPhoto);  // снимаем обработчик клика по левому переключателю в галерее
+  this.galleryControlLeft.removeEventListener('keydown', this._toPreviousPhoto);  // снимаем обработчик нажатия клавиши по левому переключателю в галерее
+  this.galleryControlRight.removeEventListener('click', this._toNextPhoto);  // снимаем обработчик клика по правому переключателю в галерее
+  this.galleryControlRight.removeEventListener('keydown', this._toNextPhoto);  // снимаем обработчик нажатия клавиши по правому переключателю в галерее
+  window.location.hash = '';
 };
 
 var gallery = new Gallery();
