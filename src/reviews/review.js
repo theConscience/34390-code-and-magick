@@ -16,8 +16,9 @@ if ('content' in reviewTemplate) {  // находим шаблон
  * @param {Object} review
  * @param {HTMLElement} container
  * @return {HTMLElement}
+ * @private
  */
-var createReviewElement = function(review) {
+var _createReviewElement = function(review) {
   var element = reviewElementToClone.cloneNode(true);
   var image = new Image(124, 124);
   var imageLoadTimeout;
@@ -82,58 +83,64 @@ var Review = function(review, container) {
   this.data = review;
 
   /** @type {HTMLElement} */
-  this.element = createReviewElement(this.data);
+  this.element = _createReviewElement(this.data);
 
-  /**
-  * Обработчик клика по кнопке полезности отзыва
-   * @param {MouseEvent} evt
-   */
-  this.onReviewAnswerClick = function(evt) {  // при вызове в addEventListener, this внутри этого обработчика ссылается на this.element
-    if (utils.hasOwnOrAncestorClass(evt.target, 'review-quiz-answer')) {
-      evt.preventDefault();
-      // снимаем класс активности, если есть и меняем aria
-      var quizElement = this.querySelector('.review-quiz');  // это работает, поскольку тут this ссылается на dom-элемент отзыва, а не на весь объект
-      if (quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS)) {
-        quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).setAttribute('aria-checked', 'false');
-        quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).classList.remove(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
-      }
-      // навешиваем класс активности на ближайший элемент с классом .review-quiz-answer и меняем aria
-      var clickedAnswerElement = utils.getClosestWithClass(evt.target, 'review-quiz-answer');
-      clickedAnswerElement.setAttribute('aria-checked', 'true');
-      clickedAnswerElement.classList.add(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
-    }
-  };
+  this.onReviewAnswerClick = this.onReviewAnswerClick.bind(this);
 
-  /**
-   * Обработчик нажатия клавиши при фокусе на кнопке полезности отзыва
-   * @param {KeyboardEvent} evt
-   */
-  this.onReviewAnswerKeyDown = function(evt) {  // при вызове в addEventListener, this внутри этого обработчика ссылается на this.element
-    if (utils.hasOwnOrAncestorClass(evt.target, 'review-quiz-answer') &&
-    utils.isActivationEvent(evt)) {
-      evt.preventDefault();
-      // снимаем класс активности, если есть и меняем aria
-      var quizElement = this.querySelector('.review-quiz');  // это работает, поскольку тут this ссылается на dom-элемент отзыва, а не на весь объект
-      if (quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS)) {
-        quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).setAttribute('aria-checked', 'false');
-        quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).classList.remove(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
-      }
-      // навешиваем класс активности на ближайший элемент с классом .review-quiz-answer и меняем aria
-      var pressedAnswerElement = utils.getClosestWithClass(evt.target, 'review-quiz-answer');
-      pressedAnswerElement.setAttribute('aria-checked', 'true');
-      pressedAnswerElement.classList.add(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
-    }
-  };
+  this.onReviewAnswerKeyDown = this.onReviewAnswerKeyDown.bind(this);
 
-  this.remove = function() {
-    this.element.removeEventListener('click', this.onReviewAnswerClick);
-    this.element.removeEventListener('keydown', this.onReviewAnswerKeyDown);
-    this.element.parentNode.removeChild(this.element);
-  };
+  this.remove = this.remove.bind(this);
 
   this.element.addEventListener('click', this.onReviewAnswerClick);  // потеря контекста this, this.element становится this внутри обработчика
   this.element.addEventListener('keydown', this.onReviewAnswerKeyDown);  // потеря контекста this, this.element становится this внутри обработчика
   container.appendChild(this.element);
+};
+
+/**
+* Обработчик клика по кнопке полезности отзыва
+ * @param {MouseEvent} evt
+ */
+Review.prototype.onReviewAnswerClick = function(evt) {  // при вызове в addEventListener, this внутри этого обработчика ссылается на this.element
+  if (utils.hasOwnOrAncestorClass(evt.target, 'review-quiz-answer')) {
+    evt.preventDefault();
+    // снимаем класс активности, если есть и меняем aria
+    var quizElement = this.element.querySelector('.review-quiz');  // это работает, поскольку тут this ссылается на dom-элемент отзыва, а не на весь объект
+    if (quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS)) {
+      quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).setAttribute('aria-checked', 'false');
+      quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).classList.remove(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
+    }
+    // навешиваем класс активности на ближайший элемент с классом .review-quiz-answer и меняем aria
+    var clickedAnswerElement = utils.getClosestWithClass(evt.target, 'review-quiz-answer');
+    clickedAnswerElement.setAttribute('aria-checked', 'true');
+    clickedAnswerElement.classList.add(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
+  }
+};
+
+/**
+ * Обработчик нажатия клавиши при фокусе на кнопке полезности отзыва
+ * @param {KeyboardEvent} evt
+ */
+Review.prototype.onReviewAnswerKeyDown = function(evt) {  // при вызове в addEventListener, this внутри этого обработчика ссылается на this.element
+  if (utils.hasOwnOrAncestorClass(evt.target, 'review-quiz-answer') &&
+  utils.isActivationEvent(evt)) {
+    evt.preventDefault();
+    // снимаем класс активности, если есть и меняем aria
+    var quizElement = this.element.querySelector('.review-quiz');  // это работает, поскольку тут this ссылается на dom-элемент отзыва, а не на весь объект
+    if (quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS)) {
+      quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).setAttribute('aria-checked', 'false');
+      quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).classList.remove(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
+    }
+    // навешиваем класс активности на ближайший элемент с классом .review-quiz-answer и меняем aria
+    var pressedAnswerElement = utils.getClosestWithClass(evt.target, 'review-quiz-answer');
+    pressedAnswerElement.setAttribute('aria-checked', 'true');
+    pressedAnswerElement.classList.add(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
+  }
+};
+
+Review.prototype.remove = function() {
+  this.element.removeEventListener('click', this.onReviewAnswerClick);
+  this.element.removeEventListener('keydown', this.onReviewAnswerKeyDown);
+  this.element.parentNode.removeChild(this.element);
 };
 
 module.exports = Review;
