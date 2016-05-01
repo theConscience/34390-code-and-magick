@@ -40,10 +40,6 @@ var Gallery = function() {
    */
   this.photoRelPathPrefixRegExp = /(img\/\S+)/;
 
-  //this.savePhotos = this.savePhotos.bind(this);  // это не обязательно, т.к. метод всегда вызывается с контекстом галереи.
-
-  //this.showPhoto = this.showPhoto.bind(this);  // это не обязательно, т.к. метод всегда вызывается с контекстом галереи.
-
   this._isGalleryShown = this._isGalleryShown.bind(this);
 
   this._onDocumentKeyDown = this._onDocumentKeyDown.bind(this);
@@ -55,10 +51,6 @@ var Gallery = function() {
   this._toPreviousPhoto = this._toPreviousPhoto.bind(this);
 
   this._toNextPhoto = this._toNextPhoto.bind(this);
-
-  //this.showGallery = this.showGallery.bind(this);  // это не обязательно, т.к. метод всегда вызывается с контекстом галереи.
-
-  //this.hideGallery = this.hideGallery.bind(this);  // это не обязательно, т.к. метод всегда вызывается с контекстом галереи.
 };
 
 /**
