@@ -8,7 +8,6 @@ var loadReviews = require('./reviews/load_reviews');
 var reviews = require('./reviews/reviews');
 var gallery = require('./gallery/gallery');
 
-
 /*
  * game initializing
  */

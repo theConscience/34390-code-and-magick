@@ -83,7 +83,7 @@ module.exports = {
    * @return {boolean}
    */
   hasOwnOrAncestorClass: function(elem, className) {
-    while (elem.parentNode !== null) {
+    while (elem.parentNode !== null && elem.parentNode.classList) {
       if (elem.classList.contains(className) ||
       elem.parentNode.classList.contains(className)) {
         return true;
@@ -95,7 +95,8 @@ module.exports = {
   },
 
   /**
-   * Возвраща
+   * Возвращает ближайший элемент с некоторым классом, идёт вверх по DOM-дереву
+   * начиная с текущего элемента
    * @param {HTMLElement} elem
    * @param {string} className
    * @return {HTMLElement}
@@ -109,6 +110,48 @@ module.exports = {
       }
     }
     return null;
+  },
+
+  /**
+   * Копирует в первый аргумент-объект - свойства всех последующих
+   * аргументов (они тоже должны быть объектами). Может иметь сколько угодно аргументов.
+   * При перекрытии - более новые одноимённые свойства перезапишут более старые.
+   * @param {Object} newObj
+   * @param {Object}
+   * @return {Object}
+   */
+  assign: function(newObj) {
+    newObj = newObj || {};
+    var o = null;
+    var k = null;
+    var key = null;
+    var value = null;
+    for (o = 1; o < arguments.length; o++) {
+      for (k = 0; k < Object.keys(arguments[o]).length; k++) {
+        key = Object.keys(arguments[o])[k];
+        value = arguments[o][Object.keys(arguments[o])[k]];
+        newObj[key] = value;
+      }
+    }
+    return newObj;
+  },
+
+  /**
+   * Нацеливает свойство [[PROTOTYPE]] первого аргумента (функции-конструктора)
+   * на прототип второго аргумента (также функция-конструктор),
+   * если у первой функции уже был определён прототип - сохраняет его
+   * в промежуточный объект, а после изменения цепочки прототипов
+   * восстанавливает все значения из промежуточного объекта.
+   * @param {Function} childClass
+   * @param {Function} parentClass
+   */
+  inherit: function(childClass, parentClass) {
+    var Empty = function() {};
+    var childClassPrototypeCopy = this.assign({}, childClass.prototype);
+    Empty.prototype = parentClass.prototype;
+    childClass.prototype = new Empty();
+    this.assign(childClass.prototype, childClassPrototypeCopy);
+    childClass.prototype.constructor = childClass;
   }
 
 };

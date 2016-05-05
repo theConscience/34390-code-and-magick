@@ -1,6 +1,7 @@
 'use strict';
 
 var utils = require('../utils/utils');
+var BaseComponent = require('../utils/base_component');
 
 var reviewTemplate = document.querySelector('#review-template');
 var reviewElementToClone = null;
@@ -18,8 +19,8 @@ if ('content' in reviewTemplate) {  // находим шаблон
  * @return {HTMLElement}
  * @private
  */
-var _createReviewElement = function(review) {
-  var element = reviewElementToClone.cloneNode(true);
+var _renderReviewElement = function(template, review) {
+  var element = template.cloneNode(true);
   var image = new Image(124, 124);
   var imageLoadTimeout;
   var IMAGE_TIMEOUT = 10000;
@@ -78,33 +79,29 @@ var _createReviewElement = function(review) {
  * @constructor
  */
 var Review = function(review, container) {
+  BaseComponent.call(this, review, container, reviewElementToClone);
 
-  /** @type {Array.<Objects>} */
-  this.data = review;
-
-  /** @type {HTMLElement} */
-  this.element = _createReviewElement(this.data);
+  this.renderElement = _renderReviewElement;
+  this.element = this.renderElement(this.template, this.data);
 
   this.onReviewAnswerClick = this.onReviewAnswerClick.bind(this);
-
   this.onReviewAnswerKeyDown = this.onReviewAnswerKeyDown.bind(this);
 
-  this.remove = this.remove.bind(this);
-
-  this.element.addEventListener('click', this.onReviewAnswerClick);  // потеря контекста this, this.element становится this внутри обработчика
-  this.element.addEventListener('keydown', this.onReviewAnswerKeyDown);  // потеря контекста this, this.element становится this внутри обработчика
-  container.appendChild(this.element);
+  this.listenEvents({'clickEvents': [this.onReviewAnswerClick], 'keyDownEvents': [this.onReviewAnswerKeyDown]});
+  this.mount(container);
 };
+
+utils.inherit(Review, BaseComponent);
 
 /**
 * Обработчик клика по кнопке полезности отзыва
  * @param {MouseEvent} evt
  */
-Review.prototype.onReviewAnswerClick = function(evt) {  // при вызове в addEventListener, this внутри этого обработчика ссылается на this.element
+Review.prototype.onReviewAnswerClick = function(evt) {  // вызывается через addEventListener, поэтому делаем перезапись метода через .bind(this) в конструкторе
   if (utils.hasOwnOrAncestorClass(evt.target, 'review-quiz-answer')) {
     evt.preventDefault();
     // снимаем класс активности, если есть и меняем aria
-    var quizElement = this.element.querySelector('.review-quiz');  // это работает, поскольку тут this ссылается на dom-элемент отзыва, а не на весь объект
+    var quizElement = this.element.querySelector('.review-quiz');
     if (quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS)) {
       quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).setAttribute('aria-checked', 'false');
       quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).classList.remove(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
@@ -120,12 +117,12 @@ Review.prototype.onReviewAnswerClick = function(evt) {  // при вызове �
  * Обработчик нажатия клавиши при фокусе на кнопке полезности отзыва
  * @param {KeyboardEvent} evt
  */
-Review.prototype.onReviewAnswerKeyDown = function(evt) {  // при вызове в addEventListener, this внутри этого обработчика ссылается на this.element
+Review.prototype.onReviewAnswerKeyDown = function(evt) {  // вызывается через addEventListener, поэтому делаем перезапись метода через .bind(this) в конструкторе
   if (utils.hasOwnOrAncestorClass(evt.target, 'review-quiz-answer') &&
   utils.isActivationEvent(evt)) {
     evt.preventDefault();
     // снимаем класс активности, если есть и меняем aria
-    var quizElement = this.element.querySelector('.review-quiz');  // это работает, поскольку тут this ссылается на dom-элемент отзыва, а не на весь объект
+    var quizElement = this.element.querySelector('.review-quiz');
     if (quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS)) {
       quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).setAttribute('aria-checked', 'false');
       quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).classList.remove(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
@@ -135,12 +132,6 @@ Review.prototype.onReviewAnswerKeyDown = function(evt) {  // при вызове
     pressedAnswerElement.setAttribute('aria-checked', 'true');
     pressedAnswerElement.classList.add(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
   }
-};
-
-Review.prototype.remove = function() {
-  this.element.removeEventListener('click', this.onReviewAnswerClick);
-  this.element.removeEventListener('keydown', this.onReviewAnswerKeyDown);
-  this.element.parentNode.removeChild(this.element);
 };
 
 module.exports = Review;
