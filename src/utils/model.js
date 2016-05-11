@@ -4,8 +4,8 @@
  * @param {Object} data
  * @constructor
  */
-var DataComponent = function(data) {
+var Model = function(data) {
   this.data = data;
 };
 
-module.exports = DataComponent;
+module.exports = Model;

@@ -3,7 +3,7 @@
 var utils = require('../utils/utils');
 var Filter = require('./filters/filter_types');
 var filterReviews = require('./filters/filter_reviews');
-var ReviewDataComponent = require('./review_data_component');
+var ReviewModel = require('./review_model');
 var Review = require('./review');
 
 var reviewsFilter = document.querySelector('.reviews-filter');
@@ -53,8 +53,8 @@ var prepareToRenderReviews = function(reviewsToRender, page, reload) {
   var to = from + PAGE_SIZE;
 
   reviewsToRender.slice(from, to).forEach(function(review) {
-    var reviewDataComponent = new ReviewDataComponent(review);
-    renderedReviews.push(new Review(reviewDataComponent, reviewsListContainer));
+    var reviewModel = new ReviewModel(review);
+    renderedReviews.push(new Review(reviewModel, reviewsListContainer));
   });
   reviewsFilter.classList.remove('invisible');
 };

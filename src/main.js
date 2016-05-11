@@ -8,9 +8,8 @@ var loadReviews = require('./reviews/load_reviews');
 var reviews = require('./reviews/reviews');
 var gallery = require('./gallery/gallery');
 
-/*
- * game initializing
- */
+
+/** game initializing */
 
 /** @type {HTMLElement} */
 var gameContainer = document.querySelector('.demo');
@@ -21,9 +20,7 @@ game.initializeLevelAndStart();
 game.setGameStatus(Verdict.INTRO);
 
 
-/*
- * add review form initializing
- */
+/** add review form initializing */
 
 /** @type {HTMLElement} */
 var formOpenButton = document.querySelector('.reviews-controls-new');
@@ -52,18 +49,14 @@ formOpenButton.addEventListener('click', onFormOpenButtonClick);  // вешае�
 formOpenButton.addEventListener('keydown', onFormOpenButtonKeyDown);  // вешаем обработчик нажатия клавиши на кнопку добавления отзыва
 
 
-/*
- * reviews initializing
- */
+/** reviews initializing */
 
 /** @constant {string} */
 var REVIEWS_LOAD_URL = '//o0.github.io/assets/json/reviews.json';
 loadReviews(REVIEWS_LOAD_URL, reviews.setReviews);
 
 
-/*
- * gallery initializing
- */
+/** gallery initializing */
 
 /** @type {HTMLElement} */
 var photoGallery = document.querySelector('.photogallery');
