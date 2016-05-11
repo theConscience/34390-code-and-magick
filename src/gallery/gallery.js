@@ -1,7 +1,6 @@
 'use strict';
 
 var utils = require('../utils/utils');
-var BaseComponent = require('../utils/base_component');
 
 /**
  * @constructor
@@ -53,8 +52,6 @@ var Gallery = function() {
 
   this._toNextPhoto = this._toNextPhoto.bind(this);
 };
-
-utils.inherit(Gallery, BaseComponent);
 
 /**
  * Сохраняет относительную часть пути из значения атрибута src всех картинок

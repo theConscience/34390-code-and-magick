@@ -3,6 +3,7 @@
 var utils = require('../utils/utils');
 var Filter = require('./filters/filter_types');
 var filterReviews = require('./filters/filter_reviews');
+var ReviewDataComponent = require('./review_data_component');
 var Review = require('./review');
 
 var reviewsFilter = document.querySelector('.reviews-filter');
@@ -12,8 +13,15 @@ var moreReviewsButton = document.querySelector('.reviews-controls-more');
 /** @type {Array.<Object>} */
 var reviews = [];
 
+/** @type {Array.<ReviewDataComponent>} */
+var reviewComponents = [];
+
+window.reviewComponents = reviewComponents;
+
 /** @type {Array.<Review>} */
 var renderedReviews = [];
+
+window.renderedReviews = renderedReviews;
 
 /** @type {Array.<Object>} */
 var filteredReviews = [];
@@ -43,8 +51,9 @@ reviewsFilter.classList.add('invisible');
 var prepareToRenderReviews = function(reviewsToRender, page, reload) {
   if (reload) {
     while (renderedReviews.length) {
-      var removedLastReview = renderedReviews.pop();
-      removedLastReview.remove();
+      reviewComponents.pop();
+      var lastRemovedReview = renderedReviews.pop();
+      lastRemovedReview.remove();
     }
   }
 
@@ -52,7 +61,10 @@ var prepareToRenderReviews = function(reviewsToRender, page, reload) {
   var to = from + PAGE_SIZE;
 
   reviewsToRender.slice(from, to).forEach(function(review) {
-    renderedReviews.push(new Review(review, reviewsListContainer));
+    console.log('review =', review);
+    console.log('reviewComponents[reviewComponents.length - 1] =', reviewComponents[reviewComponents.length - 1]);
+    reviewComponents.push(new ReviewDataComponent(review));
+    renderedReviews.push(new Review(reviewComponents[reviewComponents.length - 1], reviewsListContainer));
   });
   reviewsFilter.classList.remove('invisible');
 };

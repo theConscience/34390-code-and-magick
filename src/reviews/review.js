@@ -6,6 +6,8 @@ var BaseComponent = require('../utils/base_component');
 var reviewTemplate = document.querySelector('#review-template');
 var reviewElementToClone = null;
 var REVIEW_QUIZ_ANSWER_ACTIVE_CLASS = 'review-quiz-answer-active';
+var REVIEW_QUIZ_ANSWER_POSITIVE = 'review-quiz-answer-yes';
+var REVIEW_QUIZ_ANSWER_NEGATIVE = 'review-quiz-answer-no';
 
 if ('content' in reviewTemplate) {  // находим шаблон
   reviewElementToClone = reviewTemplate.content.querySelector('.review');
@@ -32,7 +34,7 @@ var _renderReviewElement = function(template, review) {
   var RATING_FOUR_CLASS = 'review-rating-four';
   var RATING_FIVE_CLASS = 'review-rating-five';
 
-  switch (review.rating) {
+  switch (review.getRating()) {
     case 2:
       reviewRating.classList.add(RATING_TWO_CLASS);
       break;
@@ -47,13 +49,13 @@ var _renderReviewElement = function(template, review) {
       break;
   }
 
-  reviewText.textContent = review.description;
-  authorImage.setAttribute('title', 'Оставлено ' + review.date + ' пользователем ' + review.author.name + ', полезность: ' + review.review_usefulness);
-  authorImage.setAttribute('alt', 'Аватар пользователя: ' + review.author.name);
+  reviewText.textContent = review.getDescription();
+  authorImage.setAttribute('title', 'Оставлено ' + review.getDate() + ' пользователем ' + review.getAuthorName() + ', полезность: ' + review.getReviewUsefulness());
+  authorImage.setAttribute('alt', 'Аватар пользователя: ' + review.getAuthorName());
 
   image.onload = function() {
     clearTimeout(imageLoadTimeout);
-    authorImage.setAttribute('src', review.author.picture);
+    authorImage.setAttribute('src', review.getPictureSrc());
     authorImage.setAttribute('width', '124');
     authorImage.setAttribute('height', '124');
   };
@@ -67,7 +69,7 @@ var _renderReviewElement = function(template, review) {
     element.classList.add('review-load-failure');
   }, IMAGE_TIMEOUT);
 
-  image.src = review.author.picture;
+  image.src = review.getPictureSrc();
 
   //container.appendChild(element);
   return element;
@@ -87,11 +89,33 @@ var Review = function(review, container) {
   this.onReviewAnswerClick = this.onReviewAnswerClick.bind(this);
   this.onReviewAnswerKeyDown = this.onReviewAnswerKeyDown.bind(this);
 
-  this.listenEvents({'clickEvents': [this.onReviewAnswerClick], 'keyDownEvents': [this.onReviewAnswerKeyDown]});
+  this.onSetRating = this.onSetRating.bind(this);
+  this.onSetUsefulness = this.onSetUsefulness.bind(this);
+
   this.mount(container);
+  this.listenEvents({
+    'clickEvents': [this.onReviewAnswerClick],
+    'keyDownEvents': [this.onReviewAnswerKeyDown],
+    'customEvents': [
+      ['set:rating', this.onSetRating],
+      ['set:usefulness', this.onSetUsefulness]
+    ]
+  });
 };
 
 utils.inherit(Review, BaseComponent);
+
+Review.prototype.reRender = function() {
+  BaseComponent.prototype.reRender.call(this);
+  this.listenEvents({
+    'clickEvents': [this.onReviewAnswerClick],
+    'keyDownEvents': [this.onReviewAnswerKeyDown],
+    'customEvents': [
+      ['set:rating', this.onSetRating],
+      ['set:usefulness', this.onSetUsefulness]
+    ]
+  });
+};
 
 /**
 * Обработчик клика по кнопке полезности отзыва
@@ -100,16 +124,12 @@ utils.inherit(Review, BaseComponent);
 Review.prototype.onReviewAnswerClick = function(evt) {  // вызывается через addEventListener, поэтому делаем перезапись метода через .bind(this) в конструкторе
   if (utils.hasOwnOrAncestorClass(evt.target, 'review-quiz-answer')) {
     evt.preventDefault();
-    // снимаем класс активности, если есть и меняем aria
-    var quizElement = this.element.querySelector('.review-quiz');
-    if (quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS)) {
-      quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).setAttribute('aria-checked', 'false');
-      quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).classList.remove(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
-    }
-    // навешиваем класс активности на ближайший элемент с классом .review-quiz-answer и меняем aria
     var clickedAnswerElement = utils.getClosestWithClass(evt.target, 'review-quiz-answer');
-    clickedAnswerElement.setAttribute('aria-checked', 'true');
-    clickedAnswerElement.classList.add(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
+    if (clickedAnswerElement.classList.contains(REVIEW_QUIZ_ANSWER_POSITIVE)) {
+      this.data.setReviewUsefulness(true);
+    } else if (clickedAnswerElement.classList.contains(REVIEW_QUIZ_ANSWER_NEGATIVE)) {
+      this.data.setReviewUsefulness(false);
+    }
   }
 };
 
@@ -121,16 +141,51 @@ Review.prototype.onReviewAnswerKeyDown = function(evt) {  // вызываетс�
   if (utils.hasOwnOrAncestorClass(evt.target, 'review-quiz-answer') &&
   utils.isActivationEvent(evt)) {
     evt.preventDefault();
+    var pressedAnswerElement = utils.getClosestWithClass(evt.target, 'review-quiz-answer');
+    if (pressedAnswerElement.classList.contains(REVIEW_QUIZ_ANSWER_POSITIVE)) {
+      this.data.setReviewUsefulness(true);
+    } else if (pressedAnswerElement.classList.contains(REVIEW_QUIZ_ANSWER_NEGATIVE)) {
+      this.data.setReviewUsefulness(false);
+    }
+  }
+};
+
+/**
+ * Обработчик изменения рейтинга компонента данных отзыва
+ * @param {CustomEvent} evt
+ */
+Review.prototype.onSetRating = function(evt) {  // вызывается через addEventListener, поэтому делаем перезапись метода через .bind(this) в конструкторе
+  if (evt.detail.data === this.data) {
+    console.log('Review component #' + (parseInt(renderedReviews.indexOf(this), 10) + 1) + ' rating was changed, going to re-render!');
+    this.reRender();  // либо ререндерим
+    // либо делаем декорирование, в данном случае - навешиваем правильный класс на this.element
+  }
+};
+
+/**
+ * Обработчик изменения полезности компонента данных отзыва
+ * @param {CustomEvent} evt
+ */
+Review.prototype.onSetUsefulness = function(evt) {  // вызывается через addEventListener, поэтому делаем перезапись метода через .bind(this) в конструкторе
+  console.log('onSetUsefulness evt.detail =', evt.detail);
+  if (evt.detail.data === this.data) {
+    console.log('Review component #' + (parseInt(renderedReviews.indexOf(this), 10) + 1) + ' usefulness was changed, going to decorate!');
+
     // снимаем класс активности, если есть и меняем aria
     var quizElement = this.element.querySelector('.review-quiz');
     if (quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS)) {
       quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).setAttribute('aria-checked', 'false');
       quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS).classList.remove(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
     }
-    // навешиваем класс активности на ближайший элемент с классом .review-quiz-answer и меняем aria
-    var pressedAnswerElement = utils.getClosestWithClass(evt.target, 'review-quiz-answer');
-    pressedAnswerElement.setAttribute('aria-checked', 'true');
-    pressedAnswerElement.classList.add(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
+    // навешиваем класс активности на нужный элемент с классом .review-quiz-answer и меняем aria
+    var answerElement = null;
+    if (evt.detail.answer === true) {
+      answerElement = this.element.querySelector('.' + REVIEW_QUIZ_ANSWER_POSITIVE);
+    } else {
+      answerElement = this.element.querySelector('.' + REVIEW_QUIZ_ANSWER_NEGATIVE);
+    }
+    answerElement.setAttribute('aria-checked', 'true');
+    answerElement.classList.add(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);
   }
 };
 
