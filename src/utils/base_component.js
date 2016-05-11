@@ -213,26 +213,18 @@ BaseComponent.prototype.removeCustomListeners = function() {
     this.customEvents = [];
   } else {
     for (var a = 0; a < arguments.length; a++) {
-      console.log('a =', a);
-      console.log('arguments[a] =', arguments[a]);
       var e = 0;
       while (this.customEvents[e]) {
-        console.log('e =', e);
-        console.log('this.customEvents[e] =', this.customEvents[e]);
         if (arguments[a][0] === this.customEvents[e][0] &&
         arguments[a][1] === this.customEvents[e][1]) {
-          console.log('has right Type and Event');
           document.removeEventListener(arguments[a][0], arguments[a][1]);
         } else if (arguments[a][0] === this.customEvents[e][0] &&
         !arguments[a][1]) {
-          console.log('has right Type but no event');
           document.removeEventListener(arguments[a][0], this.customEvents[e][1]);
         } else if (!arguments[a][0] &&
         arguments[a][1] === this.customEvents[e][1]) {
-          console.log('has no type but right Event');
           document.removeEventListener(this.customEvents[e][0], arguments[a][1]);
         } else {
-          console.log('type and event doesn\'t match');
           e++;
           continue;
         }
