@@ -6,8 +6,8 @@ var BaseComponent = require('../utils/base_component');
 var reviewTemplate = document.querySelector('#review-template');
 var reviewElementToClone = null;
 var REVIEW_QUIZ_ANSWER_ACTIVE_CLASS = 'review-quiz-answer-active';
-var REVIEW_QUIZ_ANSWER_POSITIVE = 'review-quiz-answer-yes';
-var REVIEW_QUIZ_ANSWER_NEGATIVE = 'review-quiz-answer-no';
+var REVIEW_QUIZ_ANSWER_POSITIVE_CLASS = 'review-quiz-answer-yes';
+var REVIEW_QUIZ_ANSWER_NEGATIVE_CLASS = 'review-quiz-answer-no';
 
 if ('content' in reviewTemplate) {  // находим шаблон
   reviewElementToClone = reviewTemplate.content.querySelector('.review');
@@ -125,9 +125,9 @@ Review.prototype.onReviewAnswerClick = function(evt) {  // вызывается 
   if (utils.hasOwnOrAncestorClass(evt.target, 'review-quiz-answer')) {
     evt.preventDefault();
     var clickedAnswerElement = utils.getClosestWithClass(evt.target, 'review-quiz-answer');
-    if (clickedAnswerElement.classList.contains(REVIEW_QUIZ_ANSWER_POSITIVE)) {
+    if (clickedAnswerElement.classList.contains(REVIEW_QUIZ_ANSWER_POSITIVE_CLASS)) {
       this.data.setReviewUsefulness(true);
-    } else if (clickedAnswerElement.classList.contains(REVIEW_QUIZ_ANSWER_NEGATIVE)) {
+    } else if (clickedAnswerElement.classList.contains(REVIEW_QUIZ_ANSWER_NEGATIVE_CLASS)) {
       this.data.setReviewUsefulness(false);
     }
   }
@@ -142,9 +142,9 @@ Review.prototype.onReviewAnswerKeyDown = function(evt) {  // вызываетс�
   utils.isActivationEvent(evt)) {
     evt.preventDefault();
     var pressedAnswerElement = utils.getClosestWithClass(evt.target, 'review-quiz-answer');
-    if (pressedAnswerElement.classList.contains(REVIEW_QUIZ_ANSWER_POSITIVE)) {
+    if (pressedAnswerElement.classList.contains(REVIEW_QUIZ_ANSWER_POSITIVE_CLASS)) {
       this.data.setReviewUsefulness(true);
-    } else if (pressedAnswerElement.classList.contains(REVIEW_QUIZ_ANSWER_NEGATIVE)) {
+    } else if (pressedAnswerElement.classList.contains(REVIEW_QUIZ_ANSWER_NEGATIVE_CLASS)) {
       this.data.setReviewUsefulness(false);
     }
   }
@@ -156,7 +156,6 @@ Review.prototype.onReviewAnswerKeyDown = function(evt) {  // вызываетс�
  */
 Review.prototype.onSetRating = function(evt) {  // вызывается через addEventListener, поэтому делаем перезапись метода через .bind(this) в конструкторе
   if (evt.detail.data === this.data) {
-    console.log('Review component #' + (parseInt(renderedReviews.indexOf(this), 10) + 1) + ' rating was changed, going to re-render!');
     this.reRender();  // либо ререндерим
     // либо делаем декорирование, в данном случае - навешиваем правильный класс на this.element
   }
@@ -167,10 +166,7 @@ Review.prototype.onSetRating = function(evt) {  // вызывается чере
  * @param {CustomEvent} evt
  */
 Review.prototype.onSetUsefulness = function(evt) {  // вызывается через addEventListener, поэтому делаем перезапись метода через .bind(this) в конструкторе
-  console.log('onSetUsefulness evt.detail =', evt.detail);
   if (evt.detail.data === this.data) {
-    console.log('Review component #' + (parseInt(renderedReviews.indexOf(this), 10) + 1) + ' usefulness was changed, going to decorate!');
-
     // снимаем класс активности, если есть и меняем aria
     var quizElement = this.element.querySelector('.review-quiz');
     if (quizElement.querySelector('.' + REVIEW_QUIZ_ANSWER_ACTIVE_CLASS)) {
@@ -180,9 +176,9 @@ Review.prototype.onSetUsefulness = function(evt) {  // вызывается че
     // навешиваем класс активности на нужный элемент с классом .review-quiz-answer и меняем aria
     var answerElement = null;
     if (evt.detail.answer === true) {
-      answerElement = this.element.querySelector('.' + REVIEW_QUIZ_ANSWER_POSITIVE);
+      answerElement = this.element.querySelector('.' + REVIEW_QUIZ_ANSWER_POSITIVE_CLASS);
     } else {
-      answerElement = this.element.querySelector('.' + REVIEW_QUIZ_ANSWER_NEGATIVE);
+      answerElement = this.element.querySelector('.' + REVIEW_QUIZ_ANSWER_NEGATIVE_CLASS);
     }
     answerElement.setAttribute('aria-checked', 'true');
     answerElement.classList.add(REVIEW_QUIZ_ANSWER_ACTIVE_CLASS);

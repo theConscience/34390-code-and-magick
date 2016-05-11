@@ -13,15 +13,8 @@ var moreReviewsButton = document.querySelector('.reviews-controls-more');
 /** @type {Array.<Object>} */
 var reviews = [];
 
-/** @type {Array.<ReviewDataComponent>} */
-var reviewComponents = [];
-
-window.reviewComponents = reviewComponents;
-
 /** @type {Array.<Review>} */
 var renderedReviews = [];
-
-window.renderedReviews = renderedReviews;
 
 /** @type {Array.<Object>} */
 var filteredReviews = [];
@@ -51,7 +44,6 @@ reviewsFilter.classList.add('invisible');
 var prepareToRenderReviews = function(reviewsToRender, page, reload) {
   if (reload) {
     while (renderedReviews.length) {
-      reviewComponents.pop();
       var lastRemovedReview = renderedReviews.pop();
       lastRemovedReview.remove();
     }
@@ -61,10 +53,8 @@ var prepareToRenderReviews = function(reviewsToRender, page, reload) {
   var to = from + PAGE_SIZE;
 
   reviewsToRender.slice(from, to).forEach(function(review) {
-    console.log('review =', review);
-    console.log('reviewComponents[reviewComponents.length - 1] =', reviewComponents[reviewComponents.length - 1]);
-    reviewComponents.push(new ReviewDataComponent(review));
-    renderedReviews.push(new Review(reviewComponents[reviewComponents.length - 1], reviewsListContainer));
+    var reviewDataComponent = new ReviewDataComponent(review);
+    renderedReviews.push(new Review(reviewDataComponent, reviewsListContainer));
   });
   reviewsFilter.classList.remove('invisible');
 };

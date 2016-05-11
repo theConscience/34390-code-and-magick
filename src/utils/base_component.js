@@ -7,10 +7,18 @@
  * @constructor
  */
 var BaseComponent = function(data, container, template) {
-  this.template = template || document.createElement('div');  // DOM-нода которую будем клонировать
-  //data.connectedComponent += this.element;
+  /** @type {Object} */
   this.data = data;
 
+  /** @type {HTMLElement} */
+  this.template = template || document.createElement('div');  // DOM-нода которую будем клонировать
+
+  /**
+   * Функция отрисовки элемента из шаблона и данных, возвращает новый элемент
+   * @param {HTMLElement} templateElement
+   * @param {Object} someData
+   * @return {HTMLElement}
+   */
   this.renderElement = function(templateElement, someData) {
     var element = templateElement.cloneNode(true);
     element.textContent = JSON.stringify(someData);
@@ -18,18 +26,23 @@ var BaseComponent = function(data, container, template) {
     return element;
   };
 
+  /** @type {HTMLElement} */
   this.element = this.renderElement(this.template, this.data);
 
   this.reRender = this.reRender.bind(this);
 
-  this.mount = function(mountHere) {
-    mountHere.appendChild(this.element);
+  /** Метод для добавления компонента в DOM */
+  this.mount = function(parentElement) {
+    parentElement.appendChild(this.element);
   };
 
   this.unmount = this.unmount.bind(this);
 
+  /** @type {Array} */
   this.clickEvents = [];
+  /** @type {Array} */
   this.keyDownEvents = [];
+  /** @type {Array} */
   this.customEvents = [];
 
   this.onClick = this.onClick.bind(this);
@@ -47,6 +60,7 @@ var BaseComponent = function(data, container, template) {
 
   this.remove = this.remove.bind(this);
 
+  // // Example:
   // this.mount(container);
   // this.listenEvents({
   //   'clickEvents': [this.onClick],
@@ -54,32 +68,46 @@ var BaseComponent = function(data, container, template) {
   // });
 };
 
+/**
+ * Метод для полной перерисовки компонента в том же месте,
+ * внутри того же контейнера
+ */
 BaseComponent.prototype.reRender = function() {
   var container = this.element.parentNode;
   var nextElement = this.element.nextSibling;
   this.remove();
   this.element = this.renderElement(this.template, this.data);
-  //this.data.connectedComponent += this.element;
+
   if (nextElement) {
     container.insertBefore(this.element, nextElement);
   } else {
     this.mount(container);
   }
+  // // Example:
   // this.listenEvents({
   //   'clickEvents': [this.onClick],
   //   'keyDownEvents': [this.onKeyDown]
   // });
 };
 
+/** Метод для изъятия компонента из DOM */
 BaseComponent.prototype.unmount = function() {
   this.element.parentNode.removeChild(this.element);
 };
 
+/**
+ * Обработчик клика по DOM-элементу компоненту
+ * @param {MouseEvent} evt
+ */
 BaseComponent.prototype.onClick = function(evt) {
   evt.preventDefault();
   console.log('event type is:', evt.type, '\nBase component ' + evt.target + ' was ' + evt.type + 'ed!');
 };
 
+/**
+ * Обработчик нажатия клавиши при фокусе на DOM-элементе компонента
+ * @param {MouseEvent} evt
+ */
 BaseComponent.prototype.onKeyDown = function(evt) {
   evt.preventDefault();
   console.log('event type is:', evt.type, '\nBase component ' + evt.target + ' was ' + evt.type + 'ed!');
@@ -121,6 +149,10 @@ BaseComponent.prototype.listenCustomEvents = function() {
   }
 };
 
+/**
+ * Функция для навешивания множественных обработчиков
+ * @param {Object} options
+ */
 BaseComponent.prototype.listenEvents = function(options) {
   if (options.clickEvents) {
     this.listenClickEvents.apply(this, options.clickEvents);
@@ -174,25 +206,43 @@ BaseComponent.prototype.removeKeyDownListeners = function() {
 };
 
 BaseComponent.prototype.removeCustomListeners = function() {
-  var e = null;
   if (arguments.length === 0) {
     for (e = 0; e < this.customEvents.length; e++) {
       document.removeEventListener(this.customEvents[e][0], this.customEvents[e][1]);
     }
     this.customEvents = [];
   } else {
-    for (e = 0; e < arguments.length; e++) {
-      var eventPosition = this.customEvents.indexOf(arguments[e]);
-      if (!~eventPosition) {
-        console.error(Error('There is no such handler in this component`s customEvents array'));
-        continue;
+    for (var a = 0; a < arguments.length; a++) {
+      console.log('a =', a);
+      console.log('arguments[a] =', arguments[a]);
+      var e = 0;
+      while (this.customEvents[e]) {
+        console.log('e =', e);
+        console.log('this.customEvents[e] =', this.customEvents[e]);
+        if (arguments[a][0] === this.customEvents[e][0] &&
+        arguments[a][1] === this.customEvents[e][1]) {
+          console.log('has right Type and Event');
+          document.removeEventListener(arguments[a][0], arguments[a][1]);
+        } else if (arguments[a][0] === this.customEvents[e][0] &&
+        !arguments[a][1]) {
+          console.log('has right Type but no event');
+          document.removeEventListener(arguments[a][0], this.customEvents[e][1]);
+        } else if (!arguments[a][0] &&
+        arguments[a][1] === this.customEvents[e][1]) {
+          console.log('has no type but right Event');
+          document.removeEventListener(this.customEvents[e][0], arguments[a][1]);
+        } else {
+          console.log('type and event doesn\'t match');
+          e++;
+          continue;
+        }
+        this.customEvents.splice(e, 1);
       }
-      document.removeEventListener(arguments[e][0], arguments[e][1]);
-      this.customEvents.splice(eventPosition, 1);
     }
   }
 };
 
+/** Снимает все обработчики кликов (не доработана для customEvents) */
 BaseComponent.prototype.removeListeners = function() {
   var e = null;
   if (arguments.length === 0) {  // если метод выполняется без аргументов
@@ -203,21 +253,24 @@ BaseComponent.prototype.removeListeners = function() {
     for (e = 0; e < arguments.length; e++) {
       var clickEventPosition = this.clickEvents.indexOf(arguments[e]);
       var keyDownEventPosition = this.keyDownEvents.indexOf(arguments[e]);
-      var customEventPosition = this.customEvents.indexOf(arguments[e]);
-      if (!~clickEventPosition && !~keyDownEventPosition && !~customEventPosition) {
+      //var customEventPosition = this.customEvents.indexOf(arguments[e]);
+      if (!~clickEventPosition && !~keyDownEventPosition) {  // && !~customEventPosition
         console.error(Error('There is no such handler in this component`s events arrays'));
         return;
       } else if (~clickEventPosition) {
         this.removeClickListeners(arguments[e]);
       } else if (~keyDownEventPosition) {
         this.removeKeyDownListeners(arguments[e]);
-      } else if (~customEventPosition) {
-        this.removeCustomListeners(arguments[e]);
-      }
+      }// else if (~customEventPosition) {
+      //   this.removeCustomListeners(arguments[e]);
+      // }  // подумать как - и доделать
     }
   }
 };
 
+/**
+ * Метод для удаления компонента - изымает его из DOM, убирает все обработчики
+ */
 BaseComponent.prototype.remove = function() {
   this.unmount();
   this.removeListeners();
