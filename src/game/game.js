@@ -426,39 +426,6 @@ Game.prototype = {
       popupRelativeStartPosY = me.y + me.height;
     }
 
-    // var drawPopupShape = function(canvas, strokeStyleColor, fillStyleColor, shadowOffset) {
-    //   shadowOffset = shadowOffset || 0;
-    //   canvas.ctx.lineWidth = 1;
-    //   canvas.ctx.strokeStyle = strokeStyleColor;
-    //   if (fillStyleColor) {
-    //     canvas.ctx.fillStyle = fillStyleColor;
-    //   }
-    //   canvas.ctx.beginPath();
-    //   canvas.ctx.moveTo( popupRelativeStartPosX + shadowOffset, popupRelativeStartPosY + shadowOffset );
-    //   canvas.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth + shadowOffset, popupRelativeStartPosY + shadowOffset );
-    //   canvas.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth + shadowOffset, popupRelativeStartPosY + popupSmallSideHeight + shadowOffset );
-    //   canvas.ctx.lineTo( popupRelativeStartPosX + shadowOffset, popupRelativeStartPosY + popupBigSideHeight + shadowOffset );
-    //   canvas.ctx.closePath();
-    //   canvas.ctx.fill();
-    //   canvas.ctx.stroke();
-    // };
-
-    // var drawPopupTail = function(canvas, strokeStyleColor, fillStyleColor, shadowOffset) {
-    //   shadowOffset = shadowOffset || 0;
-    //   canvas.ctx.lineWidth = 1;
-    //   canvas.ctx.strokeStyle = strokeStyleColor;
-    //   if (fillStyleColor) {
-    //     canvas.ctx.fillStyle = fillStyleColor;
-    //   }
-    //   canvas.ctx.beginPath();
-    //   canvas.ctx.moveTo( popupRelativeStartPosX + 295 + shadowOffset, popupRelativeStartPosY + 95 + shadowOffset );
-    //   canvas.ctx.lineTo( popupRelativeStartPosX + 295 + shadowOffset, popupRelativeStartPosY + popupMaxHeight + shadowOffset );
-    //   canvas.ctx.bezierCurveTo( popupRelativeStartPosX + 288 + shadowOffset, popupRelativeStartPosY + 150 + shadowOffset, popupRelativeStartPosX + 249 + shadowOffset, popupRelativeStartPosY + 131 + shadowOffset, popupRelativeStartPosX + 157 + shadowOffset, popupRelativeStartPosY + 133 + shadowOffset );
-    //   canvas.ctx.closePath();
-    //   canvas.ctx.fill();
-    //   canvas.ctx.stroke();
-    // };
-
     /**
      * Рисование всплывающего окошка на Canvas'е
      * @param {Canvas} canvas
