@@ -21,25 +21,46 @@ var checkFields = function(mark) {
   var reviewerNameCheck = !!reviewerName.value && isNaN(parseInt(reviewerName.value, 10)) || false;  // имя введено, и не начинается с цифры
   var reviewTextCheck = true;
 
+  /**
+   * Действия выполняемые после проверки поля
+   * @param {boolean} success
+   * @param {HTMLElement} fieldElement
+   * @param {HTMLElement} fieldErrorElement
+   * @param {HTMLElement} fieldReminderElement
+   * @param {string} validationText
+   * @param {boolean} firstNumberCheck
+   * @param {string} numberCheckValidationText
+   * @private
+   */
+  var _onFieldCheck = function(success, fieldElement, fieldErrorElement, fieldReminderElement, validationText, firstNumberCheck, numberCheckValidationText) {
+    validationText = validationText || '';
+    if (firstNumberCheck) {
+      if (!isNaN(parseInt(fieldElement.value, 10))) {
+        fieldElement.setCustomValidity(numberCheckValidationText);
+        fieldErrorElement.innerHTML = fieldElement.validationMessage;
+      } else {
+        fieldElement.setCustomValidity(validationText);
+        fieldErrorElement.innerHTML = fieldElement.validationMessage;
+      }
+    } else {
+      fieldElement.setCustomValidity(validationText);
+      fieldErrorElement.innerHTML = fieldElement.validationMessage;
+    }
+    if (success) {
+      fieldErrorElement.classList.add(utils.HIDDEN_CLASS_NAME);
+      fieldReminderElement.classList.add(utils.HIDDEN_CLASS_NAME);
+    } else {
+      fieldErrorElement.classList.remove(utils.HIDDEN_CLASS_NAME);
+      fieldReminderElement.classList.remove(utils.HIDDEN_CLASS_NAME);
+    }
+  };
+
   if (reviewerNameCheck) {
-    reviewerName.setCustomValidity('');
-    reviewerNameError.innerHTML = reviewerName.validationMessage;
-    reviewerNameError.classList.add(utils.HIDDEN_CLASS_NAME);
-    reviewFieldsName.classList.add(utils.HIDDEN_CLASS_NAME);
+    _onFieldCheck(true, reviewerName, reviewerNameError, reviewFieldsName);
   } else {
-    if (!isNaN(parseInt(reviewerName.value, 10))) {  // имя начинается с цифры
-      reviewerName.setCustomValidity('Вы ввели что-то, не слишком похожее на имя... :(');
-      reviewerNameError.innerHTML = reviewerName.validationMessage;
-    } else {  // имя не введено
-      reviewerName.setCustomValidity('Вам точно стоит это заполнить :)');
-      reviewerNameError.innerHTML = reviewerName.validationMessage;
-    }
-    if (reviewerNameError.classList.contains(utils.HIDDEN_CLASS_NAME)) {
-      reviewerNameError.classList.remove(utils.HIDDEN_CLASS_NAME);
-    }
-    if (reviewFieldsName.classList.contains(utils.HIDDEN_CLASS_NAME)) {
-      reviewFieldsName.classList.remove(utils.HIDDEN_CLASS_NAME);
-    }
+    var reviewerNameEmptyText = 'Вам точно стоит это заполнить :)';
+    var reviewerNameWrongText = 'Вы ввели что-то, не слишком похожее на имя... :(';
+    _onFieldCheck(false, reviewerName, reviewerNameError, reviewFieldsName, reviewerNameEmptyText, true, reviewerNameWrongText);
   }
 
   utils.forEachNode(reviewMarks, function(index, node) {
@@ -57,19 +78,10 @@ var checkFields = function(mark) {
   }
 
   if (reviewTextCheck) {
-    reviewText.setCustomValidity('');
-    reviewTextError.innerHTML = reviewText.validationMessage;
-    reviewTextError.classList.add(utils.HIDDEN_CLASS_NAME);
-    reviewFieldsText.classList.add(utils.HIDDEN_CLASS_NAME);
+    _onFieldCheck(true, reviewText, reviewTextError, reviewFieldsText);
   } else {
-    reviewText.setCustomValidity('Мы жаждем конструктивной критики, поэтому нам бы очень хотелось прочитать Ваш отзыв !');
-    reviewTextError.innerHTML = reviewText.validationMessage;
-    if (reviewTextError.classList.contains(utils.HIDDEN_CLASS_NAME)) {
-      reviewTextError.classList.remove(utils.HIDDEN_CLASS_NAME);
-    }
-    if (reviewFieldsText.classList.contains(utils.HIDDEN_CLASS_NAME)) {
-      reviewFieldsText.classList.remove(utils.HIDDEN_CLASS_NAME);
-    }
+    var reviewEmptyText = 'Мы жаждем конструктивной критики, поэтому нам бы очень хотелось прочитать Ваш отзыв !';
+    _onFieldCheck(false, reviewText, reviewTextError, reviewFieldsText, reviewEmptyText);
   }
 
   if (reviewerNameCheck && reviewTextCheck) {
@@ -78,9 +90,7 @@ var checkFields = function(mark) {
     return true;
   }
 
-  if (reviewFields.classList.contains(utils.HIDDEN_CLASS_NAME)) {
-    reviewFields.classList.remove(utils.HIDDEN_CLASS_NAME);
-  }
+  reviewFields.classList.remove(utils.HIDDEN_CLASS_NAME);
 
   formSubmitButton.setAttribute('disabled', true);
   return false;

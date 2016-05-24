@@ -216,13 +216,13 @@ BaseComponent.prototype.removeCustomListeners = function() {
       var e = 0;
       while (this.customEvents[e]) {
         if (arguments[a][0] === this.customEvents[e][0] &&
-        arguments[a][1] === this.customEvents[e][1]) {
+            arguments[a][1] === this.customEvents[e][1]) {
           document.removeEventListener(arguments[a][0], arguments[a][1]);
         } else if (arguments[a][0] === this.customEvents[e][0] &&
-        !arguments[a][1]) {
+            !arguments[a][1]) {
           document.removeEventListener(arguments[a][0], this.customEvents[e][1]);
         } else if (!arguments[a][0] &&
-        arguments[a][1] === this.customEvents[e][1]) {
+            arguments[a][1] === this.customEvents[e][1]) {
           document.removeEventListener(this.customEvents[e][0], arguments[a][1]);
         } else {
           e++;

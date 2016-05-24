@@ -426,51 +426,80 @@ Game.prototype = {
       popupRelativeStartPosY = me.y + me.height;
     }
 
-    // shape # 1 shadow
-    this.ctx.lineWidth = 1;
-    this.ctx.strokeStyle = '#000000';
-    this.ctx.beginPath();
-    this.ctx.moveTo( popupRelativeStartPosX + 10, popupRelativeStartPosY + 10 );
-    this.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth + 10, popupRelativeStartPosY + 10 );
-    this.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth + 10, popupRelativeStartPosY + popupSmallSideHeight + 10 );
-    this.ctx.lineTo( popupRelativeStartPosX + 10, popupRelativeStartPosY + popupBigSideHeight + 10 );
-    this.ctx.closePath();
-    this.ctx.fill();
-    this.ctx.stroke();
-    // shape # 1
-    this.ctx.lineWidth = 1;
-    this.ctx.strokeStyle = '#000000';
-    this.ctx.fillStyle = '#FFFFFF';
-    this.ctx.beginPath();
-    this.ctx.moveTo( popupRelativeStartPosX, popupRelativeStartPosY );
-    this.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth, popupRelativeStartPosY );
-    this.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth, popupRelativeStartPosY + popupSmallSideHeight );
-    this.ctx.lineTo( popupRelativeStartPosX, popupRelativeStartPosY + popupBigSideHeight );
-    this.ctx.closePath();
-    this.ctx.fill();
-    this.ctx.stroke();
-    // shape # 2 shadow
-    this.ctx.lineWidth = 1;
-    this.ctx.strokeStyle = '#000000';
-    this.ctx.fillStyle = '#000000';
-    this.ctx.beginPath();
-    this.ctx.moveTo( popupRelativeStartPosX + 305, popupRelativeStartPosY + 105 );
-    this.ctx.lineTo( popupRelativeStartPosX + 305, popupRelativeStartPosY + popupMaxHeight + 10 );
-    this.ctx.bezierCurveTo( popupRelativeStartPosX + 298, popupRelativeStartPosY + 160, popupRelativeStartPosX + 259, popupRelativeStartPosY + 141, popupRelativeStartPosX + 167, popupRelativeStartPosY + 143 );
-    this.ctx.closePath();
-    this.ctx.fill();
-    this.ctx.stroke();
-    // shape # 2
-    this.ctx.lineWidth = 1;
-    this.ctx.strokeStyle = '#000000';
-    this.ctx.fillStyle = '#FFFFFF';
-    this.ctx.beginPath();
-    this.ctx.moveTo( popupRelativeStartPosX + 295, popupRelativeStartPosY + 95 );
-    this.ctx.lineTo( popupRelativeStartPosX + 295, popupRelativeStartPosY + popupMaxHeight );
-    this.ctx.bezierCurveTo( popupRelativeStartPosX + 288, popupRelativeStartPosY + 150, popupRelativeStartPosX + 249, popupRelativeStartPosY + 131, popupRelativeStartPosX + 157, popupRelativeStartPosY + 133 );
-    this.ctx.closePath();
-    this.ctx.fill();
-    this.ctx.stroke();
+    // var drawPopupShape = function(canvas, strokeStyleColor, fillStyleColor, shadowOffset) {
+    //   shadowOffset = shadowOffset || 0;
+    //   canvas.ctx.lineWidth = 1;
+    //   canvas.ctx.strokeStyle = strokeStyleColor;
+    //   if (fillStyleColor) {
+    //     canvas.ctx.fillStyle = fillStyleColor;
+    //   }
+    //   canvas.ctx.beginPath();
+    //   canvas.ctx.moveTo( popupRelativeStartPosX + shadowOffset, popupRelativeStartPosY + shadowOffset );
+    //   canvas.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth + shadowOffset, popupRelativeStartPosY + shadowOffset );
+    //   canvas.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth + shadowOffset, popupRelativeStartPosY + popupSmallSideHeight + shadowOffset );
+    //   canvas.ctx.lineTo( popupRelativeStartPosX + shadowOffset, popupRelativeStartPosY + popupBigSideHeight + shadowOffset );
+    //   canvas.ctx.closePath();
+    //   canvas.ctx.fill();
+    //   canvas.ctx.stroke();
+    // };
+
+    // var drawPopupTail = function(canvas, strokeStyleColor, fillStyleColor, shadowOffset) {
+    //   shadowOffset = shadowOffset || 0;
+    //   canvas.ctx.lineWidth = 1;
+    //   canvas.ctx.strokeStyle = strokeStyleColor;
+    //   if (fillStyleColor) {
+    //     canvas.ctx.fillStyle = fillStyleColor;
+    //   }
+    //   canvas.ctx.beginPath();
+    //   canvas.ctx.moveTo( popupRelativeStartPosX + 295 + shadowOffset, popupRelativeStartPosY + 95 + shadowOffset );
+    //   canvas.ctx.lineTo( popupRelativeStartPosX + 295 + shadowOffset, popupRelativeStartPosY + popupMaxHeight + shadowOffset );
+    //   canvas.ctx.bezierCurveTo( popupRelativeStartPosX + 288 + shadowOffset, popupRelativeStartPosY + 150 + shadowOffset, popupRelativeStartPosX + 249 + shadowOffset, popupRelativeStartPosY + 131 + shadowOffset, popupRelativeStartPosX + 157 + shadowOffset, popupRelativeStartPosY + 133 + shadowOffset );
+    //   canvas.ctx.closePath();
+    //   canvas.ctx.fill();
+    //   canvas.ctx.stroke();
+    // };
+
+    /**
+     * Рисование всплывающего окошка на Canvas'е
+     * @param {Canvas} canvas
+     * @param {string} strokeStyleColor
+     * @param {string} fillStyleColor
+     * @param {number} shadowOffset
+     * @param {boolean} drawTail
+     */
+    var drawPopup = function(canvas, strokeStyleColor, fillStyleColor, shadowOffset, drawTail) {
+      shadowOffset = shadowOffset || 0;
+      canvas.ctx.lineWidth = 1;
+      canvas.ctx.strokeStyle = strokeStyleColor;
+      if (fillStyleColor) {
+        canvas.ctx.fillStyle = fillStyleColor;
+      }
+      canvas.ctx.beginPath();
+      if (!drawTail) {  // рисуем текстовую форму попапа
+        canvas.ctx.moveTo( popupRelativeStartPosX + shadowOffset, popupRelativeStartPosY + shadowOffset );
+        canvas.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth + shadowOffset, popupRelativeStartPosY + shadowOffset );
+        canvas.ctx.lineTo( popupRelativeStartPosX + popupMaxWidth + shadowOffset, popupRelativeStartPosY + popupSmallSideHeight + shadowOffset );
+        canvas.ctx.lineTo( popupRelativeStartPosX + shadowOffset, popupRelativeStartPosY + popupBigSideHeight + shadowOffset );
+      } else {  // рисуем его хвостик ^_^
+        canvas.ctx.moveTo( popupRelativeStartPosX + 295 + shadowOffset, popupRelativeStartPosY + 95 + shadowOffset );
+        canvas.ctx.lineTo( popupRelativeStartPosX + 295 + shadowOffset, popupRelativeStartPosY + popupMaxHeight + shadowOffset );
+        canvas.ctx.bezierCurveTo( popupRelativeStartPosX + 288 + shadowOffset, popupRelativeStartPosY + 150 + shadowOffset, popupRelativeStartPosX + 249 + shadowOffset, popupRelativeStartPosY + 131 + shadowOffset, popupRelativeStartPosX + 157 + shadowOffset, popupRelativeStartPosY + 133 + shadowOffset );
+      }
+      canvas.ctx.closePath();
+      canvas.ctx.fill();
+      canvas.ctx.stroke();
+    };
+
+    // shape #1 (popup main) shadow
+    drawPopup(this, '#000000', null, 10);
+    // shape #1 (popup main)
+    drawPopup(this, '#000000', '#FFFFFF');
+
+    // shape #2 (popup tail) shadow
+    drawPopup(this, '#000000', '#000000', 10, true);
+    // shape #2 (popup tail)
+    drawPopup(this, '#000000', '#FFFFFF', null, true);
+
     // text config
     this.ctx.font = '16px PT Mono';
     this.ctx.textAlign = 'left';

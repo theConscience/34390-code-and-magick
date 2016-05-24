@@ -85,7 +85,7 @@ module.exports = {
   hasOwnOrAncestorClass: function(elem, className) {
     while (elem.parentNode !== null && elem.parentNode.classList) {
       if (elem.classList.contains(className) ||
-      elem.parentNode.classList.contains(className)) {
+          elem.parentNode.classList.contains(className)) {
         return true;
       } else {
         elem = elem.parentNode;

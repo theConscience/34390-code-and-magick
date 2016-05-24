@@ -33,6 +33,18 @@ var Gallery = function() {
   /**  @type {RegExp} */
   this.hashRegExp = /#photo\/(\S+)/;
 
+  /** @type {HTMLElement} */
+  this.galleryElement = null;
+
+  /** @type {string} */
+  this.newSrc = null;
+
+  /** @type {string} */
+  this.newSrcData = [];
+
+  /** @type {string} */
+  this.newHash = null;
+
   /**
    * Webpack меняет пути к картинкам на абсолютные, поэтому в массив photos попадают абсолютные пути
    * эта регулярка используется для отделения относительной части
@@ -51,6 +63,46 @@ var Gallery = function() {
   this._toPreviousPhoto = this._toPreviousPhoto.bind(this);
 
   this._toNextPhoto = this._toNextPhoto.bind(this);
+
+  this._onHashChange = this._onHashChange.bind(this);
+
+  this._onLoadHashCheck = this._onLoadHashCheck.bind(this);
+
+  /**
+   * Функция, переключающая фотогалерею
+   * @param {Event} evt
+   * @private
+   */
+  this._photoGalleryChange = function(evt) {
+    evt.preventDefault();
+    this.newSrc = evt.target.src || evt.target.querySelector('img').src;
+    this.newSrcData = this.newSrc.match(this.hashRegExp) || this.newSrc.match(this.photoRelPathPrefixRegExp);
+    this.newHash = '#photo/' + this.newSrcData[1];
+    window.location.hash = this.newHash;
+  };
+
+  this._photoGalleryOnClick = this._photoGalleryOnClick.bind(this);
+
+  this._photoGalleryOnKeyDown = this._photoGalleryOnKeyDown.bind(this);
+
+  this.initialize = function(galleryElement) {
+    this.galleryElement = galleryElement || this.galleryElement;
+    this.galleryElement.addEventListener('click', this._photoGalleryOnClick);  // вешаем делегированный обработчик клика по фото на контейнер с фотографиями
+    this.galleryElement.addEventListener('keydown', this._photoGalleryOnKeyDown);  // вешаем делегированный обработчик нажатия клавиши при фокусе на фото, на контейнер с фотографиями
+    window.addEventListener('hashchange', this._onHashChange); // вешаем обработчик события изменения location.hash на window
+    window.addEventListener('load', this._onLoadHashCheck); // проверяем location.hash при загрузке страницыы
+  };
+
+  this.stop = function(full) {
+    if (full) {
+      this.galleryElement = null;
+    }
+    this.galleryElement.removeEventListener('click', this._photoGalleryOnClick);  // снимаем делегированный обработчик клика по фото на контейнер с фотографиями
+    this.galleryElement.removeEventListener('keydown', this._photoGalleryOnKeyDown);  // снимаем делегированный обработчик нажатия клавиши при фокусе на фото, на контейнер с фотографиями
+    window.removeEventListener('hashchange', this._onHashChange); // снимаем обработчик события изменения location.hash на window
+    window.removeEventListener('load', this._onLoadHashCheck); // снимаем location.hash при загрузке страницыы
+  };
+
 };
 
 /**
@@ -93,11 +145,11 @@ Gallery.prototype.showPhoto = function(photoIdentifier) {
     }
 
     if (photoNumber !== 0 &&  // показываем стрелку влево, если была скрыта
-    this.galleryControlLeft.classList.contains(utils.HIDDEN_CLASS_NAME)) {
+        this.galleryControlLeft.classList.contains(utils.HIDDEN_CLASS_NAME)) {
       this.galleryControlLeft.classList.remove(utils.HIDDEN_CLASS_NAME);
     }
     if (photoNumber < this.photos.length - 1 &&  // показываем стрелку вправо, если была скрыта
-    this.galleryControlRight.classList.contains(utils.HIDDEN_CLASS_NAME)) {
+        this.galleryControlRight.classList.contains(utils.HIDDEN_CLASS_NAME)) {
       this.galleryControlRight.classList.remove(utils.HIDDEN_CLASS_NAME);
     }
 
@@ -174,7 +226,7 @@ Gallery.prototype._onCloseClick = function(evt) {
  */
 Gallery.prototype._onCloseKeydown = function(evt) {
   if (evt.type === 'keydown' &&
-  utils.isActivationEvent(evt)) {
+      utils.isActivationEvent(evt)) {
     evt.preventDefault();
     this.hideGallery();
   }
@@ -186,7 +238,7 @@ Gallery.prototype._onCloseKeydown = function(evt) {
  */
 Gallery.prototype._toPreviousPhoto = function(evt) {
   if (evt.type === 'click' ||
-  evt.type === 'keydown' && utils.isActivationEvent(evt)) {
+      evt.type === 'keydown' && utils.isActivationEvent(evt)) {
     evt.preventDefault();
     if (this.photos.indexOf(this.activePhoto) === 0) {
       return;
@@ -204,7 +256,7 @@ Gallery.prototype._toPreviousPhoto = function(evt) {
  */
 Gallery.prototype._toNextPhoto = function(evt) {
   if (evt.type === 'click' ||
-  evt.type === 'keydown' && utils.isActivationEvent(evt)) {
+      evt.type === 'keydown' && utils.isActivationEvent(evt)) {
     evt.preventDefault();
     if (this.photos.indexOf(this.activePhoto) === this.photos.length - 1) {
       return;
@@ -245,6 +297,61 @@ Gallery.prototype.hideGallery = function() {
   this.galleryControlRight.removeEventListener('click', this._toNextPhoto);  // снимаем обработчик клика по правому переключателю в галерее
   this.galleryControlRight.removeEventListener('keydown', this._toNextPhoto);  // снимаем обработчик нажатия клавиши по правому переключателю в галерее
   window.location.hash = '';
+};
+
+/**
+ * Обработчик клика по фотографии
+ * @param {MouseEvent} evt
+ */
+Gallery.prototype._photoGalleryOnClick = function(evt) {
+  if (utils.hasOwnOrAncestorClass(evt.target, 'photogallery-image')) {
+    this._photoGalleryChange(evt);
+  }
+};
+
+/**
+ * Обработчик нажатия клавиши при фокусе на фотографии
+ * @param {KeyboardEvent} evt
+ */
+Gallery.prototype._photoGalleryOnKeyDown = function(evt) {
+  if (utils.hasOwnOrAncestorClass(evt.target, 'photogallery-image') &&
+      utils.isActivationEvent(evt)) {
+    this._photoGalleryChange(evt);
+  }
+};
+
+/**
+ * Поведение галереи при изменении хэша страницы
+ * @param {Event} evt
+ * @private
+ */
+Gallery.prototype._onHashChange = function(evt) {
+  var galleryHash = null;
+  var galleryWasOpen = Boolean(evt.oldURL.match(this.hashRegExp));
+  var galleryHashData = evt.newURL.match(this.hashRegExp);
+  if (galleryHashData) {
+    galleryHash = galleryHashData[0];
+  }
+  if (!galleryWasOpen && galleryHash) {  // если галерея закрыта и мы получили хэш - открываем галерею, а она покажет фото
+    this.showGallery(galleryHash);
+  } else if (galleryWasOpen && galleryHash) {  // если галерея уже открыта и мы получили хэш - просто показываем фото
+    this.showPhoto(galleryHash);
+  } else if (galleryWasOpen && !galleryHash) {  // если галерея уже открыта а хэш стал пустым - закрываем галерею
+    this.hideGallery();
+  }
+};
+
+/**
+ * Проверка хэша страницы в момент загрузки
+ * @private
+ */
+Gallery.prototype._onLoadHashCheck = function() {
+  if (window.location.href.match(this.hashRegExp)) {
+    var galleryHash = window.location.href.match(this.hashRegExp)[0];
+    if (galleryHash) {
+      this.showGallery(galleryHash);
+    }
+  }
 };
 
 var gallery = new Gallery();
