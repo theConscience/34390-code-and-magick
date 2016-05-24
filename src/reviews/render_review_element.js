@@ -1,6 +1,5 @@
 'use strict';
 
-
 /**
  * @param {Object} review
  * @param {HTMLElement} container
@@ -45,19 +44,6 @@ var renderReviewElement = function(template, review) {
   reviewText.textContent = description;
   authorImage.setAttribute('title', 'Оставлено ' + date + ' пользователем ' + authorName + ', полезность: ' + usefulness);
   authorImage.setAttribute('alt', 'Аватар пользователя: ' + authorName);
-
-  // image.onload = function() {
-  //   clearTimeout(imageLoadTimeout);
-  //   authorImage.setAttribute('src', pictureSrc);
-  //   authorImage.setAttribute('width', '124');
-  //   authorImage.setAttribute('height', '124');
-  //   delete image.onerror;
-  // };
-  //
-  // image.onerror = function() {
-  //   element.classList.add('review-load-failure');
-  //   delete image.onload;
-  // };
 
   var onImageLoad = function() {
     clearTimeout(imageLoadTimeout);
